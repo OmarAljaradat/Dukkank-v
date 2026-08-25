@@ -1,0 +1,14 @@
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+node_modules
+.git
+attached_assets
+artifacts/mockup-sandbox
+artifacts/api-server/dist
+.replit
+.replitignore
+REPLIT_SETUP_GUIDE.md
+replit.md
+*.md
+*.txt
