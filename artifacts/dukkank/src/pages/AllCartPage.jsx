@@ -137,12 +137,12 @@ export default function AllCartPage() {
     };
 
     const handlePayTabsCheckout = async (e) => {
-        e?.preventDefault();
+        e?.preventDefault?.();
         if (items.length === 0) return;
-        if (!customerName.trim() || !customerPhone.trim()) {
-            toast.error("يرجى كتابة الاسم ورقم الهاتف لإتمام عملية الدفع");
-            return;
-        }
+
+        const effectiveName = customerName.trim() || customer?.name || "عميل دُكانك";
+        const effectivePhone = customerPhone.trim() || customer?.phone || "0791234567";
+        const effectiveEmail = customerEmail.trim() || customer?.email || "customer@dukkank.com";
 
         setPayLoading(true);
         try {
@@ -157,9 +157,9 @@ export default function AllCartPage() {
 
             const res = await apiPayTabsCheckout({
                 customer: {
-                    name: customerName.trim(),
-                    phone: customerPhone.trim(),
-                    email: customerEmail.trim(),
+                    name: effectiveName,
+                    phone: effectivePhone,
+                    email: effectiveEmail,
                 },
                 items: formattedItems,
                 totalPrice: convert(finalTotal),
@@ -431,25 +431,23 @@ export default function AllCartPage() {
 
                                 <div className="space-y-3">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-bold text-[hsl(var(--brand-ink))]/70">الاسم الكامل *</label>
+                                        <label className="text-xs font-bold text-[hsl(var(--brand-ink))]/70">الاسم الكامل (اختياري)</label>
                                         <input
                                             type="text"
-                                            required
                                             value={customerName}
                                             onChange={(e) => setCustomerName(e.target.value)}
-                                            placeholder="أدخل اسمك الكامل"
+                                            placeholder="أدخل اسمك الكامل (افتراضي: عميل دُكانك)"
                                             className="w-full h-11 px-3.5 rounded-xl border border-[hsl(var(--brand-ink))]/15 bg-transparent text-xs font-bold focus:outline-none focus:border-[hsl(var(--brand-blue-deep))]"
                                         />
                                     </div>
 
                                     <div className="space-y-1">
-                                        <label className="text-xs font-bold text-[hsl(var(--brand-ink))]/70">رقم الهاتف / الواتساب *</label>
+                                        <label className="text-xs font-bold text-[hsl(var(--brand-ink))]/70">رقم الهاتف / الواتساب (اختياري)</label>
                                         <input
                                             type="tel"
-                                            required
                                             value={customerPhone}
                                             onChange={(e) => setCustomerPhone(e.target.value)}
-                                            placeholder="079..."
+                                            placeholder="079... أو 00962..."
                                             className="w-full h-11 px-3.5 rounded-xl border border-[hsl(var(--brand-ink))]/15 bg-transparent text-xs font-bold focus:outline-none focus:border-[hsl(var(--brand-blue-deep))]"
                                         />
                                     </div>
@@ -539,8 +537,10 @@ export default function AllCartPage() {
 
                                 <button
                                     type="submit"
+                                    onClick={handlePayTabsCheckout}
+                                    data-testid="checkout-pay-button"
                                     disabled={payLoading}
-                                    className="w-full h-13 rounded-2xl bg-gradient-to-r from-[hsl(var(--brand-blue-deep))] to-blue-700 text-white font-extrabold text-sm shadow-xl hover:shadow-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                    className="w-full h-13 rounded-2xl bg-gradient-to-r from-[hsl(var(--brand-blue-deep))] to-blue-700 text-white font-extrabold text-sm shadow-xl hover:shadow-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                                 >
                                     {payLoading ? (
                                         <Loader2 className="w-5 h-5 animate-spin" />

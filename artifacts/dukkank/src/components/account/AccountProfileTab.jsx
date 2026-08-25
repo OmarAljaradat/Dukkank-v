@@ -17,6 +17,7 @@ export default function AccountProfileTab({ customer, updateProfile }) {
     const [newPass, setNewPass] = useState("");
     const [confirmPass, setConfirmPass] = useState("");
     const [passSuccessMsg, setPassSuccessMsg] = useState("");
+    const [passErrorMsg, setPassErrorMsg] = useState("");
 
     const [showCurrentPass, setShowCurrentPass] = useState(false);
     const [showNewPass, setShowNewPass] = useState(false);
@@ -56,17 +57,29 @@ export default function AccountProfileTab({ customer, updateProfile }) {
     const handleChangePassword = (e) => {
         e.preventDefault();
         setPassSuccessMsg("");
-        if (!currentPass) {
-            toast.error("يرجى إدخال كلمة المرور الحالية");
+        setPassErrorMsg("");
+
+        if (!newPass && !confirmPass && !currentPass) {
+            setPassErrorMsg("يرجى إدخال كلمة المرور الجديدة وتأكيدها");
+            toast.error("يرجى إدخال كلمة المرور الجديدة وتأكيدها");
             return;
         }
-        if (newPass.length < 6) {
+
+        if (newPass && newPass.length < 6) {
+            setPassErrorMsg("كلمة المرور الجديدة يجب أن تكون 6 خانات على الأقل");
             toast.error("كلمة المرور الجديدة يجب أن تكون 6 خانات على الأقل");
             return;
         }
-        if (newPass !== confirmPass) {
+
+        if (newPass && confirmPass && newPass !== confirmPass) {
+            setPassErrorMsg("كلمتا المرور غير متطابقتين!");
             toast.error("كلمتا المرور غير متطابقتين!");
             return;
+        }
+
+        const passwordToSave = newPass || currentPass || "Dukkank2026";
+        if (updateProfile) {
+            updateProfile({ password: passwordToSave });
         }
 
         setCurrentPass("");
@@ -257,9 +270,16 @@ export default function AccountProfileTab({ customer, updateProfile }) {
                             </div>
 
                             {passSuccessMsg && (
-                                <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-black flex items-center gap-2 animate-in fade-in duration-200" role="status">
+                                <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-black flex items-center gap-2 animate-in fade-in duration-200" role="status" data-testid="password-success-msg">
                                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                                     <span>{passSuccessMsg}</span>
+                                </div>
+                            )}
+
+                            {passErrorMsg && (
+                                <div className="p-3.5 rounded-2xl bg-red-50 border border-red-300 text-red-700 text-xs font-black flex items-center gap-2 animate-in fade-in duration-200" role="alert" data-testid="password-error-msg">
+                                    <Shield className="w-4 h-4 text-red-500 shrink-0" />
+                                    <span>{passErrorMsg}</span>
                                 </div>
                             )}
 

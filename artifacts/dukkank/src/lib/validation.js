@@ -50,9 +50,9 @@ export function validatePhoneNumber(phone) {
     
     const clean = phone.replace(/[\s\-\(\)\.]/g, "").trim();
 
-    // Check minimum length (8 to 15 digits, optional leading + or 00)
+    // Check minimum length (7 to 16 digits, optional leading + or 00)
     const digitsOnly = clean.replace(/^(\+|00)/, "");
-    if (!/^[0-9]{8,15}$/.test(digitsOnly)) {
+    if (!/^[0-9]{7,16}$/.test(digitsOnly)) {
         return { valid: false, error: "رقم الهاتف غير صحيح" };
     }
 
@@ -61,18 +61,18 @@ export function validatePhoneNumber(phone) {
         return { valid: false, error: "رقم الهاتف غير صحيح" };
     }
 
-    // Jordanian formats (079..., 078..., 077..., 96279..., +96279...)
-    if (/^07[789]\d{7}$/.test(clean) || /^(\+?962)7[789]\d{7}$/.test(clean) || /^962\d{8,9}$/.test(clean)) {
+    // Jordanian formats (079..., 078..., 077..., 962..., +962..., 00962...)
+    if (/^(00962|\+962|962|0)?7[789]\d{7}$/.test(clean) || /^(00962|\+962|962)\d{8,9}$/.test(clean)) {
         return { valid: true, clean, country: "JO" };
     }
 
-    // Saudi Arabia (05..., 9665..., +9665...)
-    if (/^05\d{8}$/.test(clean) || /^(\+?966)5\d{8}$/.test(clean)) {
+    // Saudi Arabia (05..., 9665..., +9665..., 00966...)
+    if (/^(00966|\+966|966|0)?5\d{8}$/.test(clean)) {
         return { valid: true, clean, country: "SA" };
     }
 
-    // UAE (05..., 9715..., +9715...)
-    if (/^05[024568]\d{7}$/.test(clean) || /^(\+?971)5[024568]\d{7}$/.test(clean)) {
+    // UAE (05..., 9715..., +9715..., 00971...)
+    if (/^(00971|\+971|971|0)?5[024568]\d{7}$/.test(clean)) {
         return { valid: true, clean, country: "AE" };
     }
 
