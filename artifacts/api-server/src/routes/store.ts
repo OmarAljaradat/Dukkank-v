@@ -1,8 +1,8 @@
 import { Router, type IRouter } from "express";
-import { recordCartAdd, recordSubscriber } from "./insights";
+import { recordCartAdd, recordSubscriber } from "./insights.js";
 import {
   store, dbSave, requireAdmin
-} from "../lib/storeDb";
+} from "../lib/storeDb.js";
 
 const router: IRouter = Router();
 

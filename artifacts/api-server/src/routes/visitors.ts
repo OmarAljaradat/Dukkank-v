@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { isBlocked } from "./security";
-import { recordVisit } from "./insights";
+import { isBlocked } from "./security.js";
+import { recordVisit } from "./insights.js";
 import pg from "pg";
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });

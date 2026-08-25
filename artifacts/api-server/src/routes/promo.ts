@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import {
   sections, promo, socialProof, waTemplates, content,
   siteSettings, launchAnnouncement, dbSave, requireAdmin
-} from "../lib/storeDb";
+} from "../lib/storeDb.js";
 
 const router: IRouter = Router();
 

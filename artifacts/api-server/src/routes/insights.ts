@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { verifyToken } from "./auth";
+import { verifyToken } from "./auth.js";
 import pg from "pg";
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });

@@ -3,7 +3,7 @@ import pg from "pg";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
-import { sendOtpEmail, sendEmail } from "../lib/email";
+import { sendOtpEmail, sendEmail } from "../lib/email.js";
 
 const router: IRouter = Router();
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });

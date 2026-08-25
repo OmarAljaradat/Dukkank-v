@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { subscriptions, dbSave, requireAdmin } from "../lib/storeDb";
+import { subscriptions, dbSave, requireAdmin } from "../lib/storeDb.js";
 
 const router: IRouter = Router();
 

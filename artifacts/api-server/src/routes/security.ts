@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { verifyToken } from "./auth";
+import { verifyToken } from "./auth.js";
 
 const router: IRouter = Router();
 

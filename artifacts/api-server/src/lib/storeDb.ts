@@ -1,5 +1,5 @@
 import pg from "pg";
-import { verifyToken } from "../routes/auth";
+import { verifyToken } from "../routes/auth.js";
 
 export const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 
