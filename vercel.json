@@ -1,15 +1,8 @@
 {
-  "framework": "vite",
-  "buildCommand": "pnpm run build",
-  "outputDirectory": "dist",
+  "buildCommand": "pnpm run vercel-build",
+  "outputDirectory": "artifacts/dukkank/dist/public",
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/((?!api).*)", "destination": "/index.html" }
   ]
 }
