@@ -41,7 +41,7 @@ export const SUBSCRIPTIONS = [
         tagline: "خطط ألعاب أساسية بسعر مميز",
         accent: "blue",
         durations: [
-            { id: "ess-1m",  label: "شهر واحد",  four: 6.5, five: null },
+            { id: "ess-1m",  label: "شهر واحد",  four: 6.5, five: 10.0 },
             { id: "ess-3m",  label: "٣ شهور",    four: 12,  five: 19   },
             { id: "ess-12m", label: "سنة كاملة", four: 24,  five: 48   },
         ],
@@ -52,7 +52,7 @@ export const SUBSCRIPTIONS = [
         tagline: "تجربة أوسع مع مكتبة ألعاب أكبر",
         accent: "red",
         durations: [
-            { id: "ext-1m",  label: "شهر واحد",  four: 9,  five: null },
+            { id: "ext-1m",  label: "شهر واحد",  four: 9,  five: 14.0 },
             { id: "ext-3m",  label: "٣ شهور",    four: 19, five: 28   },
             { id: "ext-12m", label: "سنة كاملة", four: 42, five: 59   },
         ],

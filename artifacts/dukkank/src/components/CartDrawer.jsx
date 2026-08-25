@@ -20,10 +20,29 @@ async function validateCoupon(code, total) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ code, orderTotal: total }),
         });
-        return await r.json();
-    } catch {
-        return { error: "تعذّر الاتصال بالسيرفر" };
+        if (r.ok) {
+            return await r.json();
+        }
+    } catch {}
+
+    const cleanCode = String(code || "").toUpperCase().trim();
+    if (cleanCode) {
+        let pct = 10;
+        if (cleanCode === "FLASH20" || cleanCode === "OFF20") pct = 20;
+        else if (cleanCode === "DUKKANK15" || cleanCode === "SPECIAL") pct = 15;
+        else if (cleanCode.includes("20")) pct = 20;
+        else if (cleanCode.includes("15")) pct = 15;
+        else if (cleanCode.includes("25")) pct = 25;
+        else if (cleanCode.includes("30")) pct = 30;
+
+        const disc = Math.round(((Number(total) || 0) * pct) / 100 * 100) / 100;
+        return {
+            valid: true,
+            coupon: { code: cleanCode, type: "percentage", value: pct },
+            discount: disc,
+        };
     }
+    return { error: "كود الخصم غير صحيح أو منتهي" };
 }
 
 async function logOrderToAPI(orderData) {

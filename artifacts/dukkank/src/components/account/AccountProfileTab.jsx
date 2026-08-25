@@ -16,6 +16,7 @@ export default function AccountProfileTab({ customer, updateProfile }) {
     const [currentPass, setCurrentPass] = useState("");
     const [newPass, setNewPass] = useState("");
     const [confirmPass, setConfirmPass] = useState("");
+    const [passSuccessMsg, setPassSuccessMsg] = useState("");
 
     const [showCurrentPass, setShowCurrentPass] = useState(false);
     const [showNewPass, setShowNewPass] = useState(false);
@@ -54,6 +55,7 @@ export default function AccountProfileTab({ customer, updateProfile }) {
 
     const handleChangePassword = (e) => {
         e.preventDefault();
+        setPassSuccessMsg("");
         if (!currentPass) {
             toast.error("يرجى إدخال كلمة المرور الحالية");
             return;
@@ -70,6 +72,7 @@ export default function AccountProfileTab({ customer, updateProfile }) {
         setCurrentPass("");
         setNewPass("");
         setConfirmPass("");
+        setPassSuccessMsg("تم تحديث كلمة المرور وتأمين حسابك بنجاح! 🔐✨");
         toast.success("تم تحديث كلمة المرور بنجاح! 🔐✨");
     };
 
@@ -252,6 +255,13 @@ export default function AccountProfileTab({ customer, updateProfile }) {
                                     </p>
                                 </div>
                             </div>
+
+                            {passSuccessMsg && (
+                                <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-black flex items-center gap-2 animate-in fade-in duration-200" role="status">
+                                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                                    <span>{passSuccessMsg}</span>
+                                </div>
+                            )}
 
                             <div className="space-y-4">
                                 {/* Current Password */}

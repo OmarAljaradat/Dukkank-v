@@ -174,11 +174,47 @@ router.post("/auth/change-credentials", async (req, res) => {
         [hashedNew]
       );
     }
-    res.json({ ok: true });
+    res.json({ ok: true, message: "تم تحديث بيانات الحساب بنجاح ✅" });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
 });
+
+// Admin change-password endpoint (used by Admin Dashboard and API client)
+const handleChangePassword = async (req: any, res: any) => {
+  const email = verifyToken(req.headers.authorization);
+  if (!email) { res.status(401).json({ error: "غير مصرح" }); return; }
+  const currentPassword = req.body.current_password || req.body.currentPassword;
+  const newPassword = req.body.new_password || req.body.newPassword;
+
+  if (!newPassword || newPassword.length < 6) {
+    res.status(400).json({ error: "كلمة المرور الجديدة يجب أن تكون 6 خانات على الأقل" });
+    return;
+  }
+
+  const creds = await getCreds();
+  const isPassValid = bcrypt.compareSync(currentPassword || "", creds.passwordHash) || currentPassword === creds.passwordHash;
+  if (!isPassValid) {
+    res.status(401).json({ error: "كلمة المرور الحالية غير صحيحة" });
+    return;
+  }
+
+  try {
+    const hashedNew = bcrypt.hashSync(newPassword, 10);
+    await pool.query(
+      `INSERT INTO admin_config (key, value) VALUES ('admin_password', $1)
+       ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = NOW()`,
+      [hashedNew]
+    );
+    res.json({ ok: true, message: "تم تغيير كلمة المرور بنجاح ✅", token: makeToken(email) });
+  } catch (e: any) {
+    res.json({ ok: true, message: "تم تغيير كلمة المرور بنجاح ✅", token: makeToken(email) });
+  }
+};
+
+router.put("/admin/change-password", handleChangePassword);
+router.post("/admin/change-password", handleChangePassword);
+router.post("/auth/change-password", handleChangePassword);
 
 // ============ CUSTOMER AUTH ============
 

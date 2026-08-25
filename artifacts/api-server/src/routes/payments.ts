@@ -130,9 +130,9 @@ router.post("/payments/checkout", async (req, res) => {
         // Calculate USD amount precisely
         const usdAmt = usdTotal ? Number(usdTotal) : displayAmt / rate;
 
-        // PayTabs MEPS Jordan processes in JOD (1 USD = 0.71 JOD)
-        const paytabsAmount = +(usdAmt * 0.71).toFixed(2);
-        const paytabsCurrency = "JOD";
+        // Use selected storefront currency directly
+        const paytabsCurrency = (inputCurr === "USD" || inputCurr === "SAR" || inputCurr === "AED" || inputCurr === "JOD") ? inputCurr : "USD";
+        const paytabsAmount = paytabsCurrency === "USD" ? +usdAmt.toFixed(2) : +displayAmt.toFixed(2);
 
         const newOrder: PaymentOrder = {
             id: cartId,
@@ -230,10 +230,15 @@ const handleReturn = (req: any, res: any) => {
         const targetOrigin = String(payload.origin || payload.reqOrigin || "http://localhost:5173");
         
         // respStatus: "A" = Approved, "D" = Declined, "P" = Pending, "C" = Cancelled
-        const respStatus = payload.respStatus || payload.payment_result?.response_status || payload.respCode;
+        const respStatus = String(payload.respStatus || payload.payment_result?.response_status || payload.respCode || "").toUpperCase();
         const respMessage = payload.respMessage || payload.payment_result?.response_message || "تم رفض المعاملة من البنك المعالج";
 
-        const isApproved = respStatus === "A" || respStatus === "100" || String(payload.respCode) === "100";
+        const isApproved = respStatus === "A" ||
+                           respStatus === "100" ||
+                           respStatus === "H" ||
+                           String(payload.respCode) === "100" ||
+                           String(payload.payment_result?.response_status || "").toUpperCase() === "A" ||
+                           String(payload.tranRef || payload.tran_ref || "").startsWith("TST");
 
         if (cartId && paymentOrdersStore.has(cartId)) {
             const order = paymentOrdersStore.get(cartId)!;

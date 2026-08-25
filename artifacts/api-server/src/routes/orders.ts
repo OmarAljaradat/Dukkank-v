@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { verifyToken } from "./auth.js";
-import { requireAdmin, dbSave, dbGet } from "../lib/storeDb.js";
+import { requireAdmin, dbSave, dbLoad } from "../lib/storeDb.js";
 import pg from "pg";
 
 const router: IRouter = Router();

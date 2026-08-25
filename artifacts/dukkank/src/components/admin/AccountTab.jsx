@@ -45,6 +45,7 @@ export default function AccountTab() {
     const [showCurrent, setShowCurrent] = useState(false);
     const [showNext, setShowNext] = useState(false);
     const [busy, setBusy] = useState(false);
+    const [successMsg, setSuccessMsg] = useState("");
     
     // Extra states
     const [pinEnabled, setPinEnabled] = useState(false);
@@ -59,19 +60,19 @@ export default function AccountTab() {
         }
     }, []);
 
-    const savePin = () => {
-        if (!pinEnabled) {
+    const handlePinSave = () => {
+        if (pinEnabled) {
+            if (!pin || pin.length < 4) {
+                toast.error("رمز PIN يجب أن يكون من 4 إلى 6 أرقام");
+                return;
+            }
+            localStorage.setItem("store_admin_pin", pin);
+            toast.success("تم تفعيل وحفظ رمز PIN الرئيسي بنجاح 🔒");
+        } else {
             localStorage.removeItem("store_admin_pin");
             setPin("");
-            toast.success("تم تعطيل رمز الـ PIN");
-            return;
+            toast.info("تم إلغاء تفعيل رمز PIN الرئيسي");
         }
-        if (pin.length < 4 || pin.length > 6) {
-            toast.error("الرمز يجب أن يكون بين 4 إلى 6 أرقام");
-            return;
-        }
-        localStorage.setItem("store_admin_pin", pin);
-        toast.success("تم حفظ رمز الـ PIN السري");
     };
 
     const killSessions = () => {
@@ -100,8 +101,9 @@ export default function AccountTab() {
 
     const submit = async (e) => {
         e?.preventDefault?.();
-        if (next.length < 8) {
-            toast.error("كلمة المرور الجديدة يجب أن تكون 8 أحرف على الأقل");
+        setSuccessMsg("");
+        if (next.length < 6) {
+            toast.error("كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل");
             return;
         }
         if (next !== confirm) {
@@ -116,6 +118,7 @@ export default function AccountTab() {
         try {
             const res = await apiChangePassword(current, next);
             if (res?.token) setToken(res.token);
+            setSuccessMsg("تم تغيير كلمة المرور وتحديث إعدادات الأمان بنجاح ✅");
             toast.success(res?.message || "تم تغيير كلمة المرور بنجاح ✅", {
                 description: "كل الجلسات القديمة الأخرى تم تسجيل خروجها.",
             });
@@ -310,6 +313,13 @@ export default function AccountTab() {
                             </p>
                         </div>
                     </div>
+
+                    {successMsg && (
+                        <div className="mb-6 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-200 text-xs font-black flex items-center gap-2 animate-in fade-in duration-200" role="status">
+                            <Shield className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span>{successMsg}</span>
+                        </div>
+                    )}
 
                     <div className="space-y-5 flex-1">
                         <Field label="كلمة المرور الحالية">

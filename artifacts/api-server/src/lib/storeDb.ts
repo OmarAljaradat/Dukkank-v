@@ -44,6 +44,8 @@ export async function dbLoad(key: string, defaultVal: any): Promise<any> {
   } catch { return defaultVal; }
 }
 
+export const dbGet = dbLoad;
+
 export async function dbSave(key: string, value: any): Promise<void> {
   try {
     await pool.query(
@@ -79,7 +81,7 @@ export const DEFAULT_SUBSCRIPTIONS = [
     accent: "blue",
     visible: true,
     durations: [
-      { id: "ess-1m",  label: "شهر واحد",  four: 6.5, five: null, stockStatus: "available" },
+      { id: "ess-1m",  label: "شهر واحد",  four: 6.5, five: 10.0, stockStatus: "available" },
       { id: "ess-3m",  label: "٣ شهور",    four: 12,  five: 19, stockStatus: "available"   },
       { id: "ess-12m", label: "سنة كاملة", four: 24,  five: 48, stockStatus: "available"   },
     ],
@@ -91,7 +93,7 @@ export const DEFAULT_SUBSCRIPTIONS = [
     accent: "red",
     visible: true,
     durations: [
-      { id: "ext-1m",  label: "شهر واحد",  four: 9,  five: null, stockStatus: "available" },
+      { id: "ext-1m",  label: "شهر واحد",  four: 9,  five: 14.0, stockStatus: "available" },
       { id: "ext-3m",  label: "٣ شهور",    four: 19, five: 28, stockStatus: "available"   },
       { id: "ext-12m", label: "سنة كاملة", four: 42, five: 59, stockStatus: "available"   },
     ],

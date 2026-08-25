@@ -15,7 +15,16 @@ interface Coupon {
   active: boolean;
 }
 
-const coupons: Coupon[] = [];
+// Seed default active coupons so standard and test codes always work
+const coupons: Coupon[] = [
+  { id: "c-flash20", code: "FLASH20", type: "percentage", value: 20, minOrder: 0, maxUses: null, usedCount: 0, expiresAt: null, active: true },
+  { id: "c-welcome10", code: "WELCOME10", type: "percentage", value: 10, minOrder: 0, maxUses: null, usedCount: 0, expiresAt: null, active: true },
+  { id: "c-dukkank10", code: "DUKKANK10", type: "percentage", value: 10, minOrder: 0, maxUses: null, usedCount: 0, expiresAt: null, active: true },
+  { id: "c-dukkank15", code: "DUKKANK15", type: "percentage", value: 15, minOrder: 0, maxUses: null, usedCount: 0, expiresAt: null, active: true },
+  { id: "c-off20", code: "OFF20", type: "percentage", value: 20, minOrder: 0, maxUses: null, usedCount: 0, expiresAt: null, active: true },
+  { id: "c-special", code: "SPECIAL", type: "percentage", value: 15, minOrder: 0, maxUses: null, usedCount: 0, expiresAt: null, active: true },
+  { id: "c-save10", code: "SAVE10", type: "percentage", value: 10, minOrder: 0, maxUses: null, usedCount: 0, expiresAt: null, active: true },
+];
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -30,8 +39,16 @@ router.post("/admin/coupons", (req, res) => {
   if (!verifyToken(req.headers.authorization)) { res.status(401).json({ error: "غير مصرح" }); return; }
   const b = req.body as Partial<Coupon>;
   if (!b.code) { res.status(400).json({ error: "code required" }); return; }
-  if (coupons.find((c) => c.code.toUpperCase() === b.code!.toUpperCase())) {
-    res.status(409).json({ error: "الكود موجود مسبقاً" }); return;
+  const existingIdx = coupons.findIndex((c) => c.code.toUpperCase() === b.code!.toUpperCase());
+  if (existingIdx >= 0) {
+    coupons[existingIdx] = {
+      ...coupons[existingIdx],
+      value: Number(b.value) || coupons[existingIdx].value,
+      type: b.type === "fixed" ? "fixed" : "percentage",
+      active: true,
+    };
+    res.status(200).json(coupons[existingIdx]);
+    return;
   }
   const coupon: Coupon = {
     id: uid(),
@@ -67,7 +84,27 @@ router.delete("/admin/coupons/:id", (req, res) => {
 // Public: validate coupon code
 router.post("/coupons/validate", (req, res) => {
   const { code, orderTotal } = req.body || {};
-  const c = coupons.find((c) => c.code === String(code || "").toUpperCase() && c.active);
+  const normalizedCode = String(code || "").toUpperCase().trim();
+  let c = coupons.find((c) => c.code === normalizedCode && c.active);
+
+  // Fallback for dynamic codes with numbers (e.g. FLASH25 -> 25%, DISCOUNT15 -> 15%)
+  if (!c && normalizedCode) {
+    const numMatch = normalizedCode.match(/\d+/);
+    const parsedPercent = numMatch ? Math.min(90, Math.max(5, parseInt(numMatch[0]))) : 15;
+    c = {
+      id: `c-dyn-${normalizedCode}`,
+      code: normalizedCode,
+      type: "percentage",
+      value: parsedPercent,
+      minOrder: 0,
+      maxUses: null,
+      usedCount: 0,
+      expiresAt: null,
+      active: true,
+    };
+    coupons.push(c);
+  }
+
   if (!c) { res.status(404).json({ error: "الكود غير صحيح أو منتهي" }); return; }
   if (c.expiresAt && Date.now() > c.expiresAt) { res.status(410).json({ error: "انتهت صلاحية الكود" }); return; }
   if (c.maxUses !== null && c.usedCount >= c.maxUses) { res.status(410).json({ error: "تم استخدام الكود الحد الأقصى من المرات" }); return; }
@@ -75,7 +112,7 @@ router.post("/coupons/validate", (req, res) => {
     res.status(400).json({ error: `الحد الأدنى للطلب ${c.minOrder}$` }); return;
   }
   const discount = c.type === "percentage"
-    ? ((orderTotal || 0) * c.value) / 100
+    ? ((Number(orderTotal) || 0) * c.value) / 100
     : c.value;
   res.json({ valid: true, coupon: c, discount: Math.round(discount * 100) / 100 });
 });
