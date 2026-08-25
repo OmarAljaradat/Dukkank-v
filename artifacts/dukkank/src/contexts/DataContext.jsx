@@ -1,0 +1,409 @@
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import axios from "axios";
+import { getToken } from "../lib/api";
+import {
+    STORE as FALLBACK_STORE,
+    SUBSCRIPTIONS as FALLBACK_SUBS,
+    GAMES as FALLBACK_GAMES,
+    BUNDLES as FALLBACK_BUNDLES,
+} from "../data/products";
+
+const API = `${import.meta.env.VITE_BACKEND_URL || ""}/api`;
+const DataContext = createContext(null);
+
+const FALLBACK_SECTIONS = [
+    { id: "gamelaunch",    label: "إعلان إصدار لعبة",             visible: true },
+    { id: "recommender",   label: "مساعدك الشخصي (Recommender)", visible: true },
+    { id: "essential",     label: "الاشتراك الأساسي",            visible: true },
+    { id: "extra",         label: "الاشتراك الإضافي",            visible: true },
+    { id: "deluxe",        label: "الاشتراك الفاخر (Deluxe)",   visible: false },
+    { id: "comparison",    label: "مقارنة الاشتراكات",           visible: true },
+    { id: "bundles",       label: "الباقات المدمجة",             visible: true },
+    { id: "bundleBuilder", label: "ابني باقتك",                  visible: true },
+    { id: "games",         label: "الألعاب",                     visible: true },
+    { id: "emailSignup",   label: "اشتراك للحصول على خصم",       visible: true },
+    { id: "reviews",       label: "آراء العملاء",                visible: true },
+    { id: "faq",           label: "الأسئلة الشائعة",             visible: true },
+];
+
+const FALLBACK_PROMO = {
+    enabled: true,
+    headerBanner: {
+        enabled: true,
+        title: "🔥 خصم 15% بمناسبة عطلة نهاية الأسبوع!",
+        code: "DUKKANK15",
+        badge: "عرض خاص",
+        buttonText: "تسوّق الآن",
+        bgColor: "amber"
+    },
+    flashSale: {
+        enabled: true,
+        title: "⚡ عروض الفلاش السريعة — تنتهي قريباً!",
+        subtitle: "احصل على خصم 20% على جميع ألعاب البلايستيشن واشتراكات بلس",
+        code: "FLASH20",
+        discount: 20,
+        endTime: new Date(Date.now() + 86400000 * 2).toISOString(),
+        badge: "ساعات محددة ⏳"
+    },
+    popupModal: {
+        enabled: false,
+        title: "🎁 هدية خاصة لزيارتك الأولى!",
+        description: "احصل على خصم 10% فوري على طلبتك الأولى بمتجر دُكانك 🎮",
+        code: "WELCOME10",
+        discount: 10,
+        buttonText: "تفعيل الخصم 🚀",
+        delaySeconds: 3
+    },
+    rewardBox: {
+        enabled: false,
+        title: "🎯 جرب حظك واحصل على خصم يصل لـ 25%!",
+        code: "LUCKY25",
+        discount: 25
+    },
+    applePayNotice: {
+        enabled: true,
+        title: "تنبيه الدفع السريع عبر Apple Pay ",
+        subtitle: "للدفع المباشر السلس عبر Apple Pay، يرجى فتح المتجر في متصفح Safari. إذا كنت تتصفح من انستغرام، انسخ الرابط وافتحه بسفاري.",
+        buttonText: "📋 نسخ رابط المتجر لـ Safari"
+    }
+};
+
+const FALLBACK_SOCIAL_PROOF = {
+    enabled: true,
+    intervalSeconds: 12,
+    messages: [],
+};
+
+const FALLBACK_WA = {
+    general: "السلام عليكم 👋\nأود الاستفسار عن منتجات متجر {storeName}.",
+    productInquiry: "السلام عليكم 👋\nشفت {productName} في متجركم وأبغى أطلبه.\n\nهل لا يزال متوفر؟",
+    orderHeader: "السلام عليكم 👋\nأرغب بطلب من متجر *{storeName}*:",
+    orderFooter: "شكراً لكم 🌟",
+};
+
+const FALLBACK_SITE_SETTINGS = {
+    maintenanceMode: {
+        enabled: false,
+        title: "الموقع تحت الصيانة",
+        message: "نعمل على تحسينات رهيبة وراح نرجعلكم قريباً 🚀",
+        estimatedReturn: "",
+        showCountdown: false,
+    },
+    disableTextSelection: false,
+};
+
+const FALLBACK_LAUNCH_ANNOUNCEMENT = {
+    enabled: false,
+    gameName: "Grand Theft Auto VI",
+    description: "احصل على حسابك الأصلي المضمون لأضخم لعبة في تاريخ صناعة الألعاب. Grand Theft Auto VI يأخذك في رحلة ملحمية داخل مدينة فايس سيتي المعاد بناؤها بالكامل مع رسومات الجيل القادم وعالم حي يتنفس. تسليم فوري مع ضمان ذهبي شامل.",
+    subtitle: "عيش تجربة فايس سيتي بالكامل — عالم مفتوح بلا حدود مع Rockstar Games",
+    badge: "🔥 الإصدار الأضخم في تاريخ الألعاب",
+    launchDate: "",
+    imageUrl: "",
+    platform4: "PS4",
+    price4: 28.00,
+    platform5: "PS5",
+    price5: 45.00,
+    currency: "$",
+    ctaLabel: "احجز نسختك الآن 🔥",
+    ctaHref: "#games",
+    note: "⚠️ الطلب المسبق يضمن لك أولوية التسليم فور الإطلاق الرسمي",
+    theme: "vice",
+    bonusGift: "🎁 ضمان ذهبي مدى الحياة + GTA Online مجاناً + شحن $500,000 داخل اللعبة",
+    rating: "⭐ الأكثر انتظاراً في تاريخ الألعاب • 🏆 Rockstar Games",
+    stockLeft: 12,
+};
+
+const FALLBACK_REVIEWS = [
+    { id: "rev-1", name: "جعفر", rating: 5, text: "تعامل ممتاز ومتجر موثوق 🙏", order: 0 },
+    { id: "rev-2", name: "زيد", rating: 5, text: "ما شاء الله تعامل ممتاز 🔥", order: 1 },
+];
+
+const FALLBACK_FAQS = [
+    { id: "delivery", icon: "truck", q: "كيف يتم تسليم الطلب؟", a: "يتم التسليم فوراً عبر الموقع أو الإيميل.", order: 0 },
+];
+
+const FALLBACK_CONTENT = {
+    hero: {
+        badge: "متجر موثوق • تسليم فوري ⚡",
+        titleLine1: "كل ألعابك وااشتراكاتك",
+        titleLine2: "بضغطة زر واحدة.",
+        subtitle: "اشتراكات PlayStation Plus وألعاب رقمية أصلية بأفضل الأسعار، مع تسليم فوري ودفع مباشر عبر الموقع.",
+        ctaBrowse: "تصفّح المنتجات 🎮",
+        ctaWhatsApp: "تواصل مع الدعم الفني 💬",
+        benefitInstant: "تسليم فوري ⚡",
+        benefitOriginal: "حسابات أصلية 🛡️",
+        benefitSupport: "دعم مخصص 24/7",
+    },
+    essential: {
+        eyebrow: "الاشتراكات",
+        title: "بلايستيشن بلس أساسي",
+        description: "للاعب اللي بدو الأساسيات: ألعاب شهرية، أونلاين متعدد اللاعبين.",
+        featureTitle: "ليش الاشتراك الأساسي؟",
+        featureBullets: ["اللعب أونلاين مع أصدقائك", "ألعاب شهرية مجانية"],
+    },
+    extra: {
+        eyebrow: "الاشتراكات",
+        title: "بلايستيشن بلس إضافي",
+        description: "مكتبة أوسع تتجاوز ٤٠٠ لعبة من Sony وشركاء آخرين، بسعر يستاهل.",
+        featureTitle: "ليش الاشتراك الإضافي؟",
+        featureBullets: ["مكتبة ضخمة (+400 لعبة)", "تجارب لعب مجانية", "كل ميزات الأساسي"],
+    },
+    comparison: {
+        eyebrow: "مقارنة الباقات",
+        title: "أساسي ولا إضافي؟ شو الفرق؟",
+        description: "كل خطة لها نقاط قوتها — هاي مقارنة سريعة عشان تختار صح من أول مرة.",
+        popularBadge: "الأكثر طلباً",
+        essentialColLabel: "أساسي",
+        extraColLabel: "إضافي",
+        ctaStart: "جاهز تبدأ؟",
+        ctaEssential: "اختر الأساسي",
+        ctaExtra: "اختر الإضافي",
+        rows: [
+            { feature: "اللعب أونلاين", essential: true, extra: true },
+            { feature: "مكتبة +400 لعبة", essential: false, extra: true },
+        ],
+    },
+    bundles: {
+        eyebrow: "باقات مدمجة",
+        title: "خذ اشتراك + لعبة بسعر أقل",
+        description: "وفّر أكثر مع باقاتنا الجاهزة.",
+    },
+    bundleBuilder: {
+        eyebrow: "ابني باقتك",
+        title: "اختار أنت، واحنا نخصملك",
+        description: "ضمّ اشتراك + ألعاب، وكل ما زدت عنصر زاد الخصم تلقائياً.",
+        discountsLabel: "نسب الخصم حسب الاشتراك والمدة",
+        step1: "١) اختر جهازك",
+        step1Hint: "السعر يتغير حسب الجهاز",
+        step2: "٢) أضف اشتراك (اختياري)",
+        step3: "٣) أضف ألعاب",
+        summaryTitle: "ملخص باقتك",
+        summaryEmpty: "لسه ما اخترت شي.",
+        subtotal: "المجموع الفرعي",
+        discountLabel: "خصم باقتك",
+        totalLabel: "المجموع",
+        hintNoSub: "💡 أضف اشتراك للحصول على خصم!",
+        addAll: "أضف باقتك للسلة",
+        addedAll: "أُضيفت!",
+        reset: "ابدأ من جديد",
+    },
+    games: {
+        eyebrow: "ألعاب رقمية",
+        title: "أبرز الألعاب المتاحة",
+        description: "اختر جهازك واشترِ بضغطة زر واحدة.",
+        customGameTitle: "لعبة محددة بدّك إياها؟",
+        customGameSubtitle: "احكينا على الواتساب للدعم المباشر.",
+        customGameCta: "اطلب لعبة مخصصة",
+    },
+    reviews: {
+        eyebrow: "آراء العملاء",
+        title: "ثقة عملائنا أهم شي عنا.",
+        description: "عملاء جربوا دُكانك وتجربتهم الموثقة.",
+        ratingOutOf5: "من 5 نجوم",
+        basedOn: "مبني على",
+    },
+    faq: {
+        badge: "الأسئلة الشائعة",
+        title: "أي استفسار عندك؟",
+        description: "فريقنا متواجد ٢٤/٧ لمساعدتك.",
+    },
+    emailSignup: {
+        eyebrow: "اشترك بنشرتنا",
+        title: "احصل على خصم 10% فوراً 🎁",
+        description: "سجّل إيميلك واستلم كوبون خصم شخصي.",
+        placeholder: "your-email@example.com",
+        cta: "احصل على الكوبون",
+        success: "تم! نسخت الكوبون لك.",
+    },
+    footer: {
+        tagline: "متجرك الموثوق للاشتراكات والألعاب الرقمية مع تسليم فوري وضمان ذهبي.",
+        linksTitle: "روابط سريعة",
+        contactTitle: "تواصل معنا",
+        copyright: "© دُكانك — كل الحقوق محفوظة.",
+    },
+    policies: {
+        privacyText: "",
+        termsText: "",
+        refundText: "",
+        warrantyText: "",
+    }
+};
+
+const saveLocal = (key, val) => {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+};
+const loadLocal = (key, fallback) => {
+    try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : fallback;
+    } catch {
+        return fallback;
+    }
+};
+
+export function DataProvider({ children }) {
+    const [store, setStoreState] = useState(() => loadLocal("dukkank_live_store", FALLBACK_STORE));
+    const [subscriptions, setSubscriptionsState] = useState(() => loadLocal("dukkank_live_subscriptions", FALLBACK_SUBS));
+    const [games, setGamesState] = useState(() => loadLocal("dukkank_live_games", FALLBACK_GAMES));
+    const [adminGames, setAdminGamesState] = useState(() => loadLocal("dukkank_live_admin_games", FALLBACK_GAMES));
+    const [bundles, setBundlesState] = useState(() => loadLocal("dukkank_live_bundles", FALLBACK_BUNDLES));
+    const [sections, setSectionsState] = useState(() => loadLocal("dukkank_live_sections", FALLBACK_SECTIONS));
+    const [promo, setPromoState] = useState(() => loadLocal("dukkank_live_promo", FALLBACK_PROMO));
+    const [socialProof, setSocialProofState] = useState(() => loadLocal("dukkank_live_social_proof", FALLBACK_SOCIAL_PROOF));
+    const [waTemplates, setWATemplatesState] = useState(() => loadLocal("dukkank_live_wa_templates", FALLBACK_WA));
+    const [reviews, setReviewsState] = useState(() => loadLocal("store_reviews_list", loadLocal("dukkank_live_reviews", FALLBACK_REVIEWS)));
+    const [faqs, setFaqsState] = useState(() => loadLocal("store_faqs_list", loadLocal("dukkank_live_faqs", FALLBACK_FAQS)));
+    const [content, setContentState] = useState(() => loadLocal("dukkank_live_content", FALLBACK_CONTENT));
+    const [siteSettings, setSiteSettingsState] = useState(() => loadLocal("dukkank_live_site_settings", FALLBACK_SITE_SETTINGS));
+    const [launchAnnouncement, setLaunchAnnouncementState] = useState(() => loadLocal("dukkank_live_launch", FALLBACK_LAUNCH_ANNOUNCEMENT));
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const setStore = (val) => { setStoreState(val); saveLocal("dukkank_live_store", val); };
+    const setGames = (val) => { setGamesState(val); saveLocal("dukkank_live_games", val); setAdminGamesState(val); saveLocal("dukkank_live_admin_games", val); };
+    const setAdminGames = (val) => { setAdminGamesState(val); saveLocal("dukkank_live_admin_games", val); };
+    const setSubscriptions = (val) => { setSubscriptionsState(val); saveLocal("dukkank_live_subscriptions", val); };
+    const setBundles = (val) => { setBundlesState(val); saveLocal("dukkank_live_bundles", val); };
+    const setSections = (val) => { setSectionsState(val); saveLocal("dukkank_live_sections", val); };
+    const setPromo = (val) => { setPromoState(val); saveLocal("dukkank_live_promo", val); };
+    const setSocialProof = (val) => { setSocialProofState(val); saveLocal("dukkank_live_social_proof", val); };
+    const setWATemplates = (val) => { setWATemplatesState(val); saveLocal("dukkank_live_wa_templates", val); };
+    const setReviews = (val) => { setReviewsState(val); saveLocal("dukkank_live_reviews", val); saveLocal("store_reviews_list", val); };
+    const setFaqs = (val) => { setFaqsState(val); saveLocal("dukkank_live_faqs", val); saveLocal("store_faqs_list", val); };
+    const setContent = (val) => { setContentState(val); saveLocal("dukkank_live_content", val); };
+    const setSiteSettings = (val) => { setSiteSettingsState(val); saveLocal("dukkank_live_site_settings", val); };
+    const setLaunchAnnouncement = (val) => { setLaunchAnnouncementState(val); saveLocal("dukkank_live_launch", val); };
+
+    const mergeContent = (fetched) => {
+        if (!fetched || typeof fetched !== "object" || Array.isArray(fetched)) return content;
+        const out = {};
+        for (const key of Object.keys(FALLBACK_CONTENT)) {
+            const fb = content[key] || FALLBACK_CONTENT[key];
+            const fc = fetched[key];
+            if (fc && typeof fc === "object" && !Array.isArray(fc)) {
+                out[key] = { ...fb, ...fc };
+            } else {
+                out[key] = fc != null ? fc : fb;
+            }
+        }
+        return out;
+    };
+
+    const asArray = (v, fallback) => (Array.isArray(v) && v.length > 0 ? v : fallback);
+    const asObject = (v, fallback) => v && typeof v === "object" && !Array.isArray(v) ? v : fallback;
+
+    const fetchAll = useCallback(async () => {
+        try {
+            setLoading(true);
+            const [s, subs, gms, bnds, secs, prom, sp, wat, rvs, fqs, cnt, ss, la] = await Promise.all([
+                axios.get(`${API}/store`),
+                axios.get(`${API}/subscriptions`),
+                axios.get(`${API}/games`),
+                axios.get(`${API}/bundles`),
+                axios.get(`${API}/sections`),
+                axios.get(`${API}/promo`),
+                axios.get(`${API}/social-proof`),
+                axios.get(`${API}/wa-templates`),
+                axios.get(`${API}/reviews`),
+                axios.get(`${API}/faqs`),
+                axios.get(`${API}/content`),
+                axios.get(`${API}/site-settings`),
+                axios.get(`${API}/launch-announcement`),
+            ]);
+            if (s?.data) setStore(asObject(s.data, store));
+            if (subs?.data) setSubscriptions(asArray(subs.data, subscriptions));
+            if (gms?.data) setGames(asArray(gms.data, games));
+            if (bnds?.data) setBundles(asArray(bnds.data, bundles));
+            if (secs?.data) setSections(asArray(secs.data, sections));
+            if (prom?.data) setPromo(asObject(prom.data, promo));
+            if (sp?.data) setSocialProof(asObject(sp.data, socialProof));
+            if (wat?.data) setWATemplates(asObject(wat.data, waTemplates));
+            if (rvs?.data) {
+                const localRev = loadLocal("store_reviews_list", null);
+                if (localRev && Array.isArray(localRev) && localRev.length >= 40) {
+                    setReviews(localRev);
+                } else {
+                    setReviews(asArray(rvs.data, reviews));
+                }
+            }
+
+            if (fqs?.data) {
+                const localFaq = loadLocal("store_faqs_list", null);
+                if (localFaq && Array.isArray(localFaq) && localFaq.length >= 8) {
+                    setFaqs(localFaq);
+                } else {
+                    setFaqs(asArray(fqs.data, faqs));
+                }
+            }
+            if (cnt?.data) setContent(mergeContent(cnt.data));
+            if (ss?.data) setSiteSettings(asObject(ss.data, siteSettings));
+            if (la?.data) setLaunchAnnouncement(asObject(la.data, launchAnnouncement));
+
+            const token = getToken();
+            if (token) {
+                try {
+                    const adminRes = await axios.get(`${API}/admin/games`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    if (adminRes?.data) setAdminGames(asArray(adminRes.data, adminGames));
+                } catch (_e) { }
+            }
+            setError(null);
+        } catch (e) {
+            console.warn("DataProvider using persistent local data");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchAll();
+    }, [fetchAll]);
+
+    return (
+        <DataContext.Provider
+            value={{
+                store,
+                setStore,
+                subscriptions,
+                setSubscriptions,
+                games,
+                setGames,
+                adminGames,
+                setAdminGames,
+                bundles,
+                setBundles,
+                sections,
+                setSections,
+                promo,
+                setPromo,
+                socialProof,
+                setSocialProof,
+                waTemplates,
+                setWATemplates,
+                reviews,
+                setReviews,
+                faqs,
+                setFaqs,
+                content,
+                setContent,
+                siteSettings,
+                setSiteSettings,
+                launchAnnouncement,
+                setLaunchAnnouncement,
+                loading,
+                error,
+                reload: fetchAll,
+            }}
+        >
+            {children}
+        </DataContext.Provider>
+    );
+}
+
+export function useStoreData() {
+    const ctx = useContext(DataContext);
+    if (!ctx) throw new Error("useStoreData must be used within DataProvider");
+    return ctx;
+}

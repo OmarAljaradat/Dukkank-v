@@ -1,0 +1,6 @@
+- [Dukkank store architecture](dukkank-store.md) — full-stack Arabic digital games store, PostgreSQL-persisted API, fallback-first frontend.
+- [Admin dashboard architecture](admin-dashboard.md) — 13-feature admin dashboard; all 12 mutable state vars now persisted via store_config JSONB table.
+- [Auth token format](auth.md) — `local.<base64url(JSON)>` tokens, verified by verifyToken() in auth.ts.
+- [pg-in-api-server](pg-in-api-server.md) — pg must be listed explicitly in api-server/package.json; it is NOT inherited from @workspace/db even though @workspace/db depends on it.
+- [gameDetails-deleted](gameDetails-deleted.md) — gameDetails.js and GameDetail.jsx deleted; any component importing them (e.g. Recommender.jsx) must be patched; game detail route /game/:id removed from App.tsx.
+- [new-store-sections](new-store-sections.md) — howItWorks, goldenGuarantee, aboutStore sections added to sections array + content object in store.ts; rendered via SECTION_RENDERERS in App.tsx; editable via StoreInfoTab (admin "design" group); orders stored in PostgreSQL store_orders table via pg Pool.

@@ -1,0 +1,9 @@
+run = "npx pnpm --filter @workspace/api-server run dev"
+entrypoint = "artifacts/api-server/src/index.ts"
+
+[nix]
+channel = "stable-24_05"
+
+[deployment]
+run = ["npx", "pnpm", "--filter", "@workspace/api-server", "run", "start"]
+build = ["npx", "pnpm", "run", "build"]
