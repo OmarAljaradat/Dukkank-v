@@ -15,8 +15,8 @@ router.get("/sections", async (_req, res) => {
 
 router.put("/admin/sections", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  const newSecs = req.body;
-  if (Array.isArray(newSecs)) {
+  const newSecs = Array.isArray(req.body) ? req.body : (Array.isArray(req.body?.sections) ? req.body.sections : null);
+  if (newSecs) {
     await dbSave("sections", newSecs);
     res.json(newSecs);
   } else {

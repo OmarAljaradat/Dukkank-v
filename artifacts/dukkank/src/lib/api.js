@@ -82,7 +82,7 @@ export const apiUpdateStore = (data) => client.put("/admin/store", data).then((r
 // Admin: Sections
 export const apiGetSections = () => client.get("/sections").then((r) => r.data);
 export const apiUpdateSections = (sections) =>
-    client.put("/admin/sections", { sections }).then((r) => r.data);
+    client.put("/admin/sections", Array.isArray(sections) ? sections : (sections?.sections || [])).then((r) => r.data);
 
 // Promo banner
 export const apiGetPromo = () => client.get("/promo").then((r) => r.data);
