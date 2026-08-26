@@ -34,7 +34,7 @@ export function Recommender() {
     const [selectedBudget, setSelectedBudget] = useState("all");
     const [addingId, setAddingId] = useState(null);
 
-    const availableGames = games && games.length > 0 ? games : [];
+    const availableGames = useMemo(() => (games || []).filter((g) => g.available !== false && g.visible !== false && !g.hidden), [games]);
 
     // Filter games instantly based on mood & budget
     const matchedGames = useMemo(() => {

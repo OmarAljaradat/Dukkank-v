@@ -279,9 +279,9 @@ function HomePage() {
                 );
             })}
 
-            {/* Custom subscriptions created by admin */}
+            {/* Custom subscriptions created by admin (only visible ones) */}
             {(subscriptions || [])
-                .filter((s: any) => s.id !== "essential" && s.id !== "extra" && s.id !== "deluxe")
+                .filter((s: any) => s.id !== "essential" && s.id !== "extra" && s.id !== "deluxe" && s.visible !== false && !s.hidden)
                 .map((sub: any) => (
                     <section key={sub.id} id={`sub-${sub.id}`} className="max-w-7xl mx-auto px-5 sm:px-8 py-14 sm:py-20 border-t border-[hsl(var(--brand-ink))]/10">
                         <SectionHeader

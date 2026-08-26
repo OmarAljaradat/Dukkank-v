@@ -89,6 +89,7 @@ export const GamesGrid = ({ games, isCatalogPage = false }) => {
 
     const filtered = useMemo(() => {
         let list = (games || []).filter((g) => {
+            if (g.visible === false || g.hidden === true) return false;
             if (!matchSmartSearch(g, query)) return false;
             if (platform === "five" && g.five == null) return false;
             if (platform === "four" && g.four == null) return false;

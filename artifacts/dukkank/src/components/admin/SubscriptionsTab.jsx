@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useStoreData } from "../../contexts/DataContext";
 import {
     apiUpdateSubscription,
+    apiUpdateSections,
     formatApiError,
 } from "../../lib/api";
 import { toast } from "sonner";
@@ -91,7 +92,7 @@ const toPayload = (f) => ({
 });
 
 export default function SubscriptionsTab({ onChanged }) {
-    const { subscriptions: rawSubs, setSubscriptions } = useStoreData();
+    const { subscriptions: rawSubs, setSubscriptions, sections, setSections } = useStoreData();
     const [items, setItems] = useState(() => (rawSubs && rawSubs.length ? rawSubs : DEFAULT_SUBSCRIPTIONS));
 
     useEffect(() => {
@@ -164,6 +165,13 @@ export default function SubscriptionsTab({ onChanged }) {
 
         setItems(updatedList);
         if (setSubscriptions) setSubscriptions(updatedList);
+
+        // Also sync corresponding homepage section if matching ID exists
+        if (sections && setSections) {
+            const nextSections = sections.map((sec) => (sec.id === sub.id ? { ...sec, visible: nextVisible } : sec));
+            setSections(nextSections);
+            apiUpdateSections(nextSections).catch(() => {});
+        }
 
         try {
             await apiUpdateSubscription(sub.id, toPayload(updatedSub));

@@ -58,7 +58,9 @@ const Chip = ({ selected, onClick, disabled, testId, children }) => (
 export const BundleBuilder = () => {
     const { add } = useCart();
     const { format } = useCurrency();
-    const { subscriptions: SUBSCRIPTIONS, games: GAMES, content } = useStoreData();
+    const { subscriptions: rawSubs, games: rawGames, content } = useStoreData();
+    const SUBSCRIPTIONS = useMemo(() => (rawSubs || []).filter((s) => s.visible !== false && !s.hidden), [rawSubs]);
+    const GAMES = useMemo(() => (rawGames || []).filter((g) => g.available !== false && g.visible !== false && !g.hidden), [rawGames]);
     const c = content?.bundleBuilder || {};
     const [tier, setTier] = useState("five");
     const [subId, setSubId] = useState(null); // null = no subscription picked

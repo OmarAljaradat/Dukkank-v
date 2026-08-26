@@ -169,7 +169,15 @@ const BundleCard = ({ bundle, subscriptions, games }) => {
 export const Bundles = () => {
     const { bundles, subscriptions, games, content } = useStoreData();
     const c = content?.bundles || {};
-    if (!bundles?.length) return null;
+    const visibleBundles = (bundles || []).filter((b) => {
+        if (b.visible === false || b.hidden === true) return false;
+        if (b.subId) {
+            const sub = (subscriptions || []).find((s) => s.id === b.subId);
+            if (sub && (sub.visible === false || sub.hidden === true)) return false;
+        }
+        return true;
+    });
+    if (!visibleBundles?.length) return null;
     return (
         <section
             id="bundles"
@@ -191,7 +199,7 @@ export const Bundles = () => {
                 </div>
 
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 stagger">
-                    {bundles.map((b) => (
+                    {visibleBundles.map((b) => (
                         <BundleCard key={b.id} bundle={b} subscriptions={subscriptions} games={games} />
                     ))}
                 </div>
