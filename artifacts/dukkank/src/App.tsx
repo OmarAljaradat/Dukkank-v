@@ -104,6 +104,7 @@ function GameLaunchSwitch() {
 }
 
 const SECTION_RENDERERS: Record<string, any> = {
+    hero: () => <Hero />,
     gamelaunch: ({ ...props }: any) => <GameLaunchSwitch />,
     recommender: () => <Recommender />,
     essential: ({ subscriptions, content }: any) => {
@@ -244,7 +245,9 @@ function HomePage() {
 
     const rawSections = (sections || []);
     const REMOVED_IDS = ["bundles", "bundleBuilder", "recommender", "emailSignup", "promoBanner"];
-    let visibleSections = rawSections.filter((s: any) => s.visible !== false && !REMOVED_IDS.includes(s.id));
+    const heroSec = rawSections.find((s: any) => s.id === "hero");
+    const isHeroVisible = heroSec ? heroSec.visible !== false : true;
+    let visibleSections = rawSections.filter((s: any) => s.visible !== false && s.id !== "hero" && !REMOVED_IDS.includes(s.id));
 
     // Ensure Deluxe section is always positioned immediately after Extra!
     const extraIdx = visibleSections.findIndex((s: any) => s.id === "extra");
@@ -258,7 +261,7 @@ function HomePage() {
         <div className="min-h-screen bg-[hsl(var(--brand-cream))] grain-bg" data-testid="app-root">
             <SEO title={homeTitle} description={heroDesc} canonical={origin} image="" jsonLd={[]} />
             <Header onOpenCart={() => setCartOpen(true)} onOpenWishlist={() => setWishOpen(true)} onOpenCustomerAuth={() => setCustomerAuthOpen(true)} />
-            <Hero />
+            {isHeroVisible && <Hero />}
             <FlashSaleBanner />
             <div className="max-w-7xl mx-auto px-4 sm:px-8">
                 <ApplePaySafariBanner />

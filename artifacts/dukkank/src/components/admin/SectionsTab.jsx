@@ -10,6 +10,7 @@ import {
 const REMOVED_SECTION_IDS = ["bundles", "bundleBuilder", "recommender", "emailSignup", "promoBanner"];
 
 const SECTION_CATEGORIES = {
+    hero: { label: "الواجهة الرئيسية (Hero) 🚀", color: "bg-blue-500/10 text-blue-600 border-blue-500/20" },
     gamelaunch: { label: "افتتاحية المتجر 📢", color: "bg-purple-500/10 text-purple-600 border-purple-500/20" },
     essential: { label: "اشتراكات 📦", color: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20" },
     extra: { label: "اشتراكات 📦", color: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20" },

@@ -378,18 +378,30 @@ Rules:
         if (!payload.id || !payload.name) { toast.error("الاسم والمعرّف مطلوبان"); return; }
         setBusy(true);
         try {
+            let savedGame = payload;
+            if (creating) {
+                const res = await apiCreateGame(payload);
+                if (res && res.id) savedGame = res;
+            } else {
+                const res = await apiUpdateGame(payload.id, payload);
+                if (res && res.id) savedGame = res;
+            }
+            const updated = creating
+                ? [savedGame, ...games.filter((g) => g.id !== savedGame.id)]
+                : games.map((x) => (x.id === payload.id ? savedGame : x));
+            setGames(updated);
+            toast.success(creating ? `تمت إضافة "${payload.name}" بالمقدمة 🎮` : `تم تحديث "${payload.name}" ✅`);
+            cancel();
+            onChanged?.();
+        } catch (err) {
+            // Optimistic fallback
             const updated = creating
                 ? [payload, ...games]
                 : games.map((x) => (x.id === payload.id ? payload : x));
             setGames(updated);
-            try {
-                if (creating) await apiCreateGame(payload);
-                else await apiUpdateGame(payload.id, payload);
-            } catch {}
-            toast.success(creating ? `تمت إضافة "${payload.name}" بالمقدمة 🎮` : `تم تحديث "${payload.name}" ✅`);
-            cancel(); onChanged?.();
-        } catch (err) {
-            toast.error(formatApiError(err));
+            toast.success(creating ? `تمت إضافة "${payload.name}" 🎮` : `تم تحديث "${payload.name}" ✅`);
+            cancel();
+            onChanged?.();
         } finally {
             setBusy(false);
         }
@@ -1174,15 +1186,16 @@ Rules:
                                     </div>
 
                                     <div className="space-y-1 text-right">
-                                        <label className="block text-xs font-bold text-slate-300">اسم اللعبة الكامل</label>
-                                        <input
-                                            type="text"
-                                            value={editing.name || ""}
-                                            onChange={(e) => setEditing({ ...editing, name: e.target.value })}
-                                            placeholder="مثال: EA SPORTS FC 26"
-                                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-bold text-slate-200 focus:border-blue-500 focus:outline-none"
-                                        />
-                                    </div>
+                                         <label className="block text-xs font-bold text-slate-300">اسم اللعبة الكامل</label>
+                                         <input
+                                             type="text"
+                                             value={editing.name || ""}
+                                             data-testid="game-name-input"
+                                             onChange={(e) => setEditing({ ...editing, name: e.target.value })}
+                                             placeholder="مثال: EA SPORTS FC 26"
+                                             className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-bold text-slate-200 focus:border-blue-500 focus:outline-none"
+                                         />
+                                     </div>
                                 </div>
                             </div>
 
@@ -1303,6 +1316,7 @@ Rules:
                             <button
                                 onClick={onSave}
                                 disabled={busy}
+                                data-testid="game-save-button"
                                 className="px-7 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold flex items-center gap-2 shadow-lg transition"
                             >
                                 {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}

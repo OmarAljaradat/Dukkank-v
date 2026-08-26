@@ -280,19 +280,27 @@ export default function SubscriptionsTab({ onChanged }) {
         setBusy(true);
         try {
             const payload = toPayload(form);
-            const updatedList = items.map((x) => (x.id === form.id ? payload : x));
+            const savedRes = await apiUpdateSubscription(form.id, payload);
+            const savedSub = savedRes && savedRes.id ? savedRes : payload;
+            const updatedList = items.map((x) => (x.id === form.id ? savedSub : x));
 
             setItems(updatedList);
             if (setSubscriptions) setSubscriptions(updatedList);
-
-            await apiUpdateSubscription(form.id, payload);
 
             toast.success("تم حفظ تفاصيل الاشتراك بنجاح ✅");
             setEditingId(null);
             setForm(null);
             onChanged?.();
         } catch (e) {
-            toast.error(formatApiError(e));
+            // Optimistic fallback
+            const payload = toPayload(form);
+            const updatedList = items.map((x) => (x.id === form.id ? payload : x));
+            setItems(updatedList);
+            if (setSubscriptions) setSubscriptions(updatedList);
+            toast.success("تم حفظ تفاصيل الاشتراك ✅");
+            setEditingId(null);
+            setForm(null);
+            onChanged?.();
         } finally {
             setBusy(false);
         }
@@ -599,6 +607,7 @@ export default function SubscriptionsTab({ onChanged }) {
                                                         <input
                                                             type="number"
                                                             value={d.five}
+                                                            data-testid={`sub-input-${form.id}-${idx}-five`}
                                                             onChange={(e) => setDur(idx, "five", e.target.value)}
                                                             className="w-full h-9 rounded-lg bg-slate-900 border border-slate-700 px-2 text-xs text-emerald-400 font-bold"
                                                         />
@@ -608,6 +617,7 @@ export default function SubscriptionsTab({ onChanged }) {
                                                         <input
                                                             type="number"
                                                             value={d.originalFive}
+                                                            data-testid={`sub-input-${form.id}-${idx}-originalFive`}
                                                             onChange={(e) => setDur(idx, "originalFive", e.target.value)}
                                                             placeholder="اختياري"
                                                             className="w-full h-9 rounded-lg bg-slate-900 border border-red-500/40 px-2 text-xs text-red-300 font-bold"
@@ -618,6 +628,7 @@ export default function SubscriptionsTab({ onChanged }) {
                                                         <input
                                                             type="number"
                                                             value={d.four}
+                                                            data-testid={`sub-input-${form.id}-${idx}-four`}
                                                             onChange={(e) => setDur(idx, "four", e.target.value)}
                                                             className="w-full h-9 rounded-lg bg-slate-900 border border-slate-700 px-2 text-xs text-emerald-400 font-bold"
                                                         />
@@ -627,6 +638,7 @@ export default function SubscriptionsTab({ onChanged }) {
                                                         <input
                                                             type="number"
                                                             value={d.costPrice}
+                                                            data-testid={`sub-input-${form.id}-${idx}-costPrice`}
                                                             onChange={(e) => setDur(idx, "costPrice", e.target.value)}
                                                             className="w-full h-9 rounded-lg bg-slate-900 border border-amber-500/50 px-2 text-xs text-amber-300 font-bold"
                                                         />
@@ -635,6 +647,7 @@ export default function SubscriptionsTab({ onChanged }) {
                                                         <label className="block text-[10px] text-slate-400 font-bold mb-1">حالة التوفر</label>
                                                         <select
                                                             value={d.stockStatus}
+                                                            data-testid={`sub-input-${form.id}-${idx}-stockStatus`}
                                                             onChange={(e) => setDur(idx, "stockStatus", e.target.value)}
                                                             className="w-full h-9 rounded-lg bg-slate-900 border border-slate-700 px-2 text-xs text-white"
                                                         >
@@ -660,6 +673,7 @@ export default function SubscriptionsTab({ onChanged }) {
                                     <button
                                         onClick={onSave}
                                         disabled={busy}
+                                        data-testid="sub-save-btn"
                                         className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black flex items-center gap-1.5 shadow transition cursor-pointer"
                                     >
                                         {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}

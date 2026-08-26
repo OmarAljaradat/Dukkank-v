@@ -467,10 +467,11 @@ function SectionVisualEditor({ sectionKey, content, onSave, onReload }) {
     const Icon = sec.icon || FileText;
 
     useEffect(() => {
-        const fb = DEFAULT_CONTENT_FALLBACKS[sectionKey] || {};
-        setForm({ ...fb, ...(content?.[sectionKey] || {}) });
-        setDirty(false);
-    }, [content, sectionKey]);
+        if (!dirty) {
+            const fb = DEFAULT_CONTENT_FALLBACKS[sectionKey] || {};
+            setForm({ ...fb, ...(content?.[sectionKey] || {}) });
+        }
+    }, [content, sectionKey, dirty]);
 
     const setField = (k, v) => {
         setForm((prev) => ({ ...prev, [k]: v }));
@@ -510,7 +511,8 @@ function SectionVisualEditor({ sectionKey, content, onSave, onReload }) {
 
                 <button
                     onClick={handleSave}
-                    disabled={saving || !dirty}
+                    disabled={saving}
+                    data-testid={`save-content-${sectionKey}`}
                     className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black transition shadow disabled:opacity-40 cursor-pointer flex items-center gap-1.5"
                 >
                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -527,6 +529,7 @@ function SectionVisualEditor({ sectionKey, content, onSave, onReload }) {
                             {f.type === "text" && (
                                 <Input
                                     value={form[f.key] || ""}
+                                    data-testid={`content-${sectionKey}-${f.key}`}
                                     onChange={(e) => setField(f.key, e.target.value)}
                                 />
                             )}
@@ -534,6 +537,7 @@ function SectionVisualEditor({ sectionKey, content, onSave, onReload }) {
                                 <Textarea
                                     rows={3}
                                     value={form[f.key] || ""}
+                                    data-testid={`content-${sectionKey}-${f.key}`}
                                     onChange={(e) => setField(f.key, e.target.value)}
                                 />
                             )}
@@ -603,11 +607,13 @@ export default function ContentTab({ onChanged }) {
     const [searchQuery, setSearchQuery] = useState("");
 
     const handleSaveSection = async (sectionKey, sectionValue) => {
-        const updated = { ...content, [sectionKey]: sectionValue };
-        setContent(updated);
+        const updated = { ...(content || {}), [sectionKey]: sectionValue };
+        if (setContent) setContent(updated);
         try {
             await apiUpdateContent({ [sectionKey]: sectionValue });
-        } catch {}
+        } catch (err) {
+            console.error("apiUpdateContent error:", err);
+        }
         onChanged?.();
     };
 

@@ -12,6 +12,7 @@ const API = `${import.meta.env.VITE_BACKEND_URL || ""}/api`;
 const DataContext = createContext(null);
 
 const FALLBACK_SECTIONS = [
+    { id: "hero",          label: "الواجهة الرئيسية (Hero)",     visible: true },
     { id: "gamelaunch",    label: "إعلان إصدار لعبة",             visible: true },
     { id: "recommender",   label: "مساعدك الشخصي (Recommender)", visible: true },
     { id: "essential",     label: "الاشتراك الأساسي",            visible: true },
