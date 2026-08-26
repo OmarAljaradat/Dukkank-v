@@ -168,9 +168,17 @@ export default function SubscriptionsTab({ onChanged }) {
 
         // Also sync corresponding homepage section if matching ID exists
         if (sections && setSections) {
-            const nextSections = sections.map((sec) => (sec.id === sub.id ? { ...sec, visible: nextVisible } : sec));
+            const exists = sections.some((sec) => sec.id === sub.id);
+            let nextSections;
+            if (exists) {
+                nextSections = sections.map((sec) => (sec.id === sub.id ? { ...sec, visible: nextVisible } : sec));
+            } else {
+                nextSections = [...sections, { id: sub.id, label: sub.name, visible: nextVisible }];
+            }
             setSections(nextSections);
-            apiUpdateSections(nextSections).catch(() => {});
+            try {
+                await apiUpdateSections(nextSections);
+            } catch (_) {}
         }
 
         try {
@@ -287,6 +295,12 @@ export default function SubscriptionsTab({ onChanged }) {
             setItems(updatedList);
             if (setSubscriptions) setSubscriptions(updatedList);
 
+            if (sections && setSections) {
+                const nextSections = sections.map((sec) => (sec.id === form.id ? { ...sec, visible: form.visible !== false } : sec));
+                setSections(nextSections);
+                apiUpdateSections(nextSections).catch(() => {});
+            }
+
             toast.success("تم حفظ تفاصيل الاشتراك بنجاح ✅");
             setEditingId(null);
             setForm(null);
@@ -297,6 +311,10 @@ export default function SubscriptionsTab({ onChanged }) {
             const updatedList = items.map((x) => (x.id === form.id ? payload : x));
             setItems(updatedList);
             if (setSubscriptions) setSubscriptions(updatedList);
+            if (sections && setSections) {
+                const nextSections = sections.map((sec) => (sec.id === form.id ? { ...sec, visible: form.visible !== false } : sec));
+                setSections(nextSections);
+            }
             toast.success("تم حفظ تفاصيل الاشتراك ✅");
             setEditingId(null);
             setForm(null);

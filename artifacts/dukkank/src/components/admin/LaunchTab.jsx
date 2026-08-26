@@ -186,6 +186,58 @@ export default function LaunchTab({ onChanged }) {
         }
     };
 
+    // 🏆 Gold Theme Preset
+    const handleGoldPreset = async () => {
+        if (form.enabled && form.theme === "gold") {
+            const newData = { ...form, enabled: false };
+            setForm(newData);
+            try {
+                setLaunchAnnouncement(newData);
+                await apiUpdateLaunchAnnouncement(newData);
+                toast.success("🙈 تم إيقاف وإخفاء ثيم الإطلاق من المتجر!");
+                onChanged?.();
+            } catch (err) {
+                toast.error(formatApiError(err));
+            }
+            return;
+        }
+
+        const newData = {
+            ...form,
+            enabled: true,
+            theme: "gold",
+            gameName: form.gameName || "Call of Duty: Black Ops 7",
+            badge: form.badge || "🔥 متوفر الآن للطلب المباشر والتسليم الفوري",
+            price5: form.price5 || 38.5,
+            price4: form.price4 || 18.5,
+            currency: "$",
+        };
+        setForm(newData);
+        try {
+            setLaunchAnnouncement(newData);
+            await apiUpdateLaunchAnnouncement(newData);
+            await ensureSectionVisible();
+            toast.success("🏆 تم تفعيل ونشر الثيم الذهبي الملكي بنجاح! ✨");
+            onChanged?.();
+        } catch (err) {
+            toast.error(formatApiError(err));
+        }
+    };
+
+    // ⚪ Default Store Mode (Disable Launch Banner)
+    const handleDisablePreset = async () => {
+        const newData = { ...form, enabled: false };
+        setForm(newData);
+        try {
+            setLaunchAnnouncement(newData);
+            await apiUpdateLaunchAnnouncement(newData);
+            toast.success("⚪ تم تعطيل ثيم الإطلاق — المتجر الآن بالوضع الطبيعي الافتراضي!");
+            onChanged?.();
+        } catch (err) {
+            toast.error(formatApiError(err));
+        }
+    };
+
     // Quick Countdown Date Setters
     const setQuickDays = (days) => {
         const d = new Date();
@@ -528,7 +580,57 @@ https://dukkank.com`;
             </div>
 
             {/* 🎮 Major Game Launch Presets Bar */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* ⚽ EA SPORTS FC Quick Preset */}
+                <div className={`relative rounded-3xl overflow-hidden shadow-xl bg-slate-900/90 p-5 flex flex-col justify-between space-y-4 transition-all duration-300 ${
+                    form.enabled && form.theme === "eafc"
+                        ? "border-2 border-emerald-400 ring-2 ring-emerald-400/30 shadow-emerald-400/20"
+                        : "border border-emerald-500/20 opacity-80 hover:opacity-100"
+                }`}>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-black text-lg">
+                                ⚽
+                            </div>
+                            <div>
+                                <div className="text-xs font-black text-white flex items-center gap-1.5">
+                                    <span>⚽ EA SPORTS FC</span>
+                                    <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">EA FC 27</span>
+                                </div>
+                                <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+                                    ثيم الملعب الكروي الفسفوري
+                                </p>
+                            </div>
+                        </div>
+                        {form.enabled && form.theme === "eafc" && (
+                            <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-[10px] font-black shrink-0">
+                                ✅ مفعّل
+                            </span>
+                        )}
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleEAFCPreset}
+                        className={`w-full py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-2 ${
+                            form.enabled && form.theme === "eafc"
+                                ? "bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40"
+                                : "bg-gradient-to-r from-emerald-400 to-teal-300 text-slate-950 shadow-[0_4px_15px_rgba(52,211,153,0.3)]"
+                        }`}
+                    >
+                        {form.enabled && form.theme === "eafc" ? (
+                            <>
+                                <EyeOff className="w-4 h-4 text-red-400" />
+                                <span>إيقاف وتعطيل الثيم ⏸️</span>
+                            </>
+                        ) : (
+                            <>
+                                <Zap className="w-4 h-4" />
+                                <span>تفعيل ثيم EA SPORTS FC ⚽</span>
+                            </>
+                        )}
+                    </button>
+                </div>
+
                 {/* 🌴 GTA VI Vice City Quick Preset */}
                 <div className={`relative rounded-3xl overflow-hidden shadow-xl bg-slate-900/90 p-5 flex flex-col justify-between space-y-4 transition-all duration-300 ${
                     form.enabled && form.theme === "vice"
@@ -537,12 +639,12 @@ https://dukkank.com`;
                 }`}>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                            <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
                                 style={{
                                     background: "linear-gradient(135deg, rgba(255,45,120,0.25), rgba(0,229,255,0.15))",
                                     border: "1px solid rgba(255,45,120,0.3)",
                                 }}>
-                                <span className="text-xl font-black" style={{
+                                <span className="text-lg font-black" style={{
                                     background: "linear-gradient(130deg, #ff2d78, #ffd700, #00e5ff)",
                                     WebkitBackgroundClip: "text",
                                     WebkitTextFillColor: "transparent",
@@ -550,17 +652,17 @@ https://dukkank.com`;
                             </div>
                             <div>
                                 <div className="text-xs font-black text-white flex items-center gap-1.5">
-                                    <span>🌴 GTA VI — Vice City Theme</span>
+                                    <span>🌴 GTA VI Vice City</span>
                                     <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-pink-500/20 text-pink-300">ROCKSTAR</span>
                                 </div>
                                 <p className="text-[11px] text-slate-400 font-medium mt-0.5">
-                                    ثيم Vice City النيون مع الخلفية واللوقو الشفاف والعداد التنازلي
+                                    ثيم فايس سيتي النيون مع العداد
                                 </p>
                             </div>
                         </div>
                         {form.enabled && form.theme === "vice" && (
                             <span className="px-2.5 py-1 rounded-full bg-pink-500/20 border border-pink-500/50 text-pink-300 text-[10px] font-black shrink-0">
-                                ✅ المفعّل حالياً
+                                ✅ مفعّل
                             </span>
                         )}
                     </div>
@@ -580,7 +682,7 @@ https://dukkank.com`;
                         {form.enabled && form.theme === "vice" ? (
                             <>
                                 <EyeOff className="w-4 h-4 text-red-400" />
-                                <span>إيقاف وتعطيل ثيم GTA VI من المتجر ⏸️</span>
+                                <span>إيقاف وتعطيل الثيم ⏸️</span>
                             </>
                         ) : (
                             <>
@@ -591,54 +693,67 @@ https://dukkank.com`;
                     </button>
                 </div>
 
-                {/* ⚽ EA SPORTS FC Quick Preset */}
+                {/* 🏆 Gold Theme / Default Mode Preset */}
                 <div className={`relative rounded-3xl overflow-hidden shadow-xl bg-slate-900/90 p-5 flex flex-col justify-between space-y-4 transition-all duration-300 ${
-                    form.enabled && form.theme === "eafc"
-                        ? "border-2 border-emerald-400 ring-2 ring-emerald-400/30 shadow-emerald-400/20"
-                        : "border border-emerald-500/20 opacity-80 hover:opacity-100"
+                    form.enabled && form.theme === "gold"
+                        ? "border-2 border-amber-400 ring-2 ring-amber-400/30 shadow-amber-400/20"
+                        : "border border-amber-500/20 opacity-80 hover:opacity-100"
                 }`}>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-black text-lg">
-                                ⚽
+                            <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 bg-amber-500/20 border border-amber-500/40 text-amber-400 font-black text-lg">
+                                🏆
                             </div>
                             <div>
                                 <div className="text-xs font-black text-white flex items-center gap-1.5">
-                                    <span>⚽ EA SPORTS FC Theme</span>
-                                    <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">EA SPORTS</span>
+                                    <span>🏆 البنر الذهبي الملكي</span>
+                                    <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">GOLD</span>
                                 </div>
                                 <p className="text-[11px] text-slate-400 font-medium mt-0.5">
-                                    ثيم الملعب الكروي مع الألوان الفسفورية وهدايا الـ FC Points
+                                    الثيم الذهبي الكلاسيكي لكافة الألعاب
                                 </p>
                             </div>
                         </div>
-                        {form.enabled && form.theme === "eafc" && (
-                            <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-[10px] font-black shrink-0">
-                                ✅ المفعّل حالياً
+                        {form.enabled && form.theme === "gold" && (
+                            <span className="px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-500/50 text-amber-300 text-[10px] font-black shrink-0">
+                                ✅ مفعّل
                             </span>
                         )}
                     </div>
-                    <button
-                        type="button"
-                        onClick={handleEAFCPreset}
-                        className={`w-full py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-2 ${
-                            form.enabled && form.theme === "eafc"
-                                ? "bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40"
-                                : "bg-gradient-to-r from-emerald-400 to-teal-300 text-slate-950 shadow-[0_4px_15px_rgba(52,211,153,0.3)]"
-                        }`}
-                    >
-                        {form.enabled && form.theme === "eafc" ? (
-                            <>
-                                <EyeOff className="w-4 h-4 text-red-400" />
-                                <span>إيقاف وتعطيل ثيم EA SPORTS FC من المتجر ⏸️</span>
-                            </>
-                        ) : (
-                            <>
-                                <Zap className="w-4 h-4" />
-                                <span>تفعيل ثيم EA SPORTS FC ⚽</span>
-                            </>
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={handleGoldPreset}
+                            className={`flex-1 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5 ${
+                                form.enabled && form.theme === "gold"
+                                    ? "bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40"
+                                    : "bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 shadow-[0_4px_15px_rgba(251,191,36,0.3)]"
+                            }`}
+                        >
+                            {form.enabled && form.theme === "gold" ? (
+                                <>
+                                    <EyeOff className="w-3.5 h-3.5" />
+                                    <span>إيقاف ⏸️</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Sparkles className="w-3.5 h-3.5" />
+                                    <span>تفعيل الذهبي 🏆</span>
+                                </>
+                            )}
+                        </button>
+
+                        {form.enabled && (
+                            <button
+                                type="button"
+                                onClick={handleDisablePreset}
+                                className="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-bold transition cursor-pointer"
+                                title="إخفاء البنر بالكامل والعودة للوضع الافتراضي"
+                            >
+                                ⚪ بدون ثيم
+                            </button>
                         )}
-                    </button>
+                    </div>
                 </div>
             </div>
 

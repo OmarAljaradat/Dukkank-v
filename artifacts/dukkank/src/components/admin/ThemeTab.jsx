@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getTheme, setTheme, applyTheme } from "../../lib/storage";
+import { apiGetTheme, apiUpdateTheme } from "../../lib/api";
 import { toast } from "sonner";
 import { Palette, RotateCcw, Save, Sparkles, Check, Gamepad2, ShoppingCart, ShieldCheck } from "lucide-react";
 
@@ -114,7 +115,7 @@ function hexToHsl(hex) {
     return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
 }
 
-export default function ThemeTab() {
+export default function ThemeTab({ onChanged }) {
     const [values, setValues] = useState({});
 
     useEffect(() => {
@@ -124,26 +125,35 @@ export default function ThemeTab() {
         setValues(init);
     }, []);
 
-    const save = () => {
+    const save = async () => {
         setTheme(values);
         applyTheme(values);
+        window.dispatchEvent(new CustomEvent("dukkank-theme-change", { detail: values }));
+        try { await apiUpdateTheme(values); } catch (_) {}
         toast.success("تم حفظ ثيم الألوان وتطبيقه على كافة أجزاء المتجر 🎨✅");
+        onChanged?.();
     };
 
-    const reset = () => {
+    const reset = async () => {
         const def = {};
         VARS.forEach((v) => { def[v.key] = v.default; });
         setValues(def);
         setTheme({});
         applyTheme({});
+        window.dispatchEvent(new CustomEvent("dukkank-theme-change", { detail: {} }));
+        try { await apiUpdateTheme({}); } catch (_) {}
         toast.success("تم إعادة الألوان للثيم الأصلي المعتمد");
+        onChanged?.();
     };
 
-    const applyPreset = (preset) => {
+    const applyPreset = async (preset) => {
         setValues(preset.colors);
         setTheme(preset.colors);
         applyTheme(preset.colors);
+        window.dispatchEvent(new CustomEvent("dukkank-theme-change", { detail: preset.colors }));
+        try { await apiUpdateTheme(preset.colors); } catch (_) {}
         toast.success(`تم تطبيق ثيم "${preset.name}" بنجاح ✨`);
+        onChanged?.();
     };
 
     return (

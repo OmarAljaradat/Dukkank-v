@@ -48091,6 +48091,16 @@ router13.put("/admin/launch-announcement", async (req, res) => {
   await dbSave("launchAnnouncement", updated);
   res.json(updated);
 });
+router13.get("/theme", async (_req, res) => {
+  const data = await dbLoad("theme", {});
+  res.json(data);
+});
+router13.put("/admin/theme", async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const updated = req.body || {};
+  await dbSave("theme", updated);
+  res.json(updated);
+});
 router13.get("/promo", async (_req, res) => {
   const data = await dbLoad("promo", DEFAULT_PROMO);
   res.json(data);

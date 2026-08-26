@@ -196,8 +196,8 @@ export const apiGetCustomerProfile = (phone) =>
 // ── AI Launch & Resend Email APIs ─────────────────────────────────────────────
 export const apiGenerateAiLaunchTheme = (gamePrompt) =>
     client.post("/admin/ai-launch-generator", { gamePrompt }).then((r) => r.data);
-export const apiSendEmailResend = (payload) =>
-    client.post("/admin/send-email-resend", payload).then((r) => r.data);
+export const apiGetTheme = () => client.get("/theme").then((r) => r.data);
+export const apiUpdateTheme = (theme) => client.put("/admin/theme", theme).then((r) => r.data);
 
 export function formatApiError(err) {
     const errObj = err?.response?.data;

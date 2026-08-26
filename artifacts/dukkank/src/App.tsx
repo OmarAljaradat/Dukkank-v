@@ -418,6 +418,12 @@ function ThemeAndSeoLoader() {
         // Apply saved theme overrides
         const theme = getTheme();
         if (Object.keys(theme).length > 0) applyTheme(theme);
+
+        const handleThemeChange = (e: any) => {
+            applyTheme(e.detail || {});
+        };
+        window.addEventListener("dukkank-theme-change", handleThemeChange);
+
         // Apply saved SEO title
         const seo = getSeo();
         if (seo.title) document.title = seo.title;
@@ -426,6 +432,10 @@ function ThemeAndSeoLoader() {
             if (!meta) { meta = document.createElement("meta"); meta.name = "description"; document.head.appendChild(meta); }
             meta.content = seo.description;
         }
+
+        return () => {
+            window.removeEventListener("dukkank-theme-change", handleThemeChange);
+        };
     }, []);
     return null;
 }

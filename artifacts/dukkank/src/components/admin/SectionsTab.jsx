@@ -104,7 +104,7 @@ export default function SectionsTab({ onChanged }) {
         toast.success("تم تطبيق قالب: الضمان الذهبي وثقة العملاء أولاً ⭐");
     };
 
-    const reorderListByKeys = (keys) => {
+    const reorderListByKeys = async (keys) => {
         const map = new Map(items.map((it) => [it.id, it]));
         const reordered = [];
         keys.forEach((k) => {
@@ -115,7 +115,7 @@ export default function SectionsTab({ onChanged }) {
         });
         // Append any remaining items
         map.forEach((val) => reordered.push(val));
-        setItems(reordered);
+        await autoSaveSections(reordered);
     };
 
     const onDragStart = (e, idx) => {

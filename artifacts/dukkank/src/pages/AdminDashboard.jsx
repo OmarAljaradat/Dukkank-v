@@ -207,8 +207,8 @@ export default function AdminDashboard() {
                     <TabsContent value="productsCSV"  className="mt-0"><ProductsCSVTab /></TabsContent>
                     <TabsContent value="storeInfo"    className="mt-0"><StoreInfoTab onChanged={reload} /></TabsContent>
                     <TabsContent value="content"      className="mt-0"><ContentTab onChanged={reload} /></TabsContent>
-                    <TabsContent value="theme"        className="mt-0"><ThemeTab /></TabsContent>
-                    <TabsContent value="seo"          className="mt-0"><SeoTab /></TabsContent>
+                    <TabsContent value="theme"        className="mt-0"><ThemeTab onChanged={reload} /></TabsContent>
+                    <TabsContent value="seo"          className="mt-0"><SeoTab onChanged={reload} /></TabsContent>
                     <TabsContent value="sections"     className="mt-0"><SectionsTab onChanged={reload} /></TabsContent>
                     <TabsContent value="crm"          className="mt-0"><CustomerCrmTab /></TabsContent>
                     <TabsContent value="affiliate"    className="mt-0"><AffiliateTab /></TabsContent>

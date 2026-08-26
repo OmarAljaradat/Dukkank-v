@@ -17,7 +17,7 @@ const FALLBACK_SECTIONS = [
     { id: "recommender",   label: "مساعدك الشخصي (Recommender)", visible: true },
     { id: "essential",     label: "الاشتراك الأساسي",            visible: true },
     { id: "extra",         label: "الاشتراك الإضافي",            visible: true },
-    { id: "deluxe",        label: "الاشتراك الفاخر (Deluxe)",   visible: false },
+    { id: "deluxe",        label: "الاشتراك الفاخر (Deluxe)",   visible: true },
     { id: "comparison",    label: "مقارنة الاشتراكات",           visible: true },
     { id: "bundles",       label: "الباقات المدمجة",             visible: true },
     { id: "bundleBuilder", label: "ابني باقتك",                  visible: true },
@@ -317,7 +317,7 @@ export function DataProvider({ children }) {
     const fetchAll = useCallback(async () => {
         try {
             setLoading(true);
-            const [s, subs, gms, bnds, secs, prom, sp, wat, rvs, fqs, cnt, ss, la] = await Promise.all([
+            const results = await Promise.allSettled([
                 axios.get(`${API}/store`),
                 axios.get(`${API}/subscriptions`),
                 axios.get(`${API}/games`),
@@ -332,34 +332,51 @@ export function DataProvider({ children }) {
                 axios.get(`${API}/site-settings`),
                 axios.get(`${API}/launch-announcement`),
             ]);
-            if (s?.data) setStore(asObject(s.data, store));
-            if (subs?.data) setSubscriptions(asArray(subs.data, subscriptions));
-            if (gms?.data) setGames(asArray(gms.data, games));
-            if (bnds?.data) setBundles(asArray(bnds.data, bundles));
-            if (secs?.data) setSections(asArray(secs.data, sections));
-            if (prom?.data) setPromo(mergePromo(prom.data));
-            if (sp?.data) setSocialProof(asObject(sp.data, socialProof));
-            if (wat?.data) setWATemplates(asObject(wat.data, waTemplates));
-            if (rvs?.data) {
+
+            const getVal = (idx) => (results[idx]?.status === "fulfilled" ? results[idx].value?.data : null);
+
+            const s = getVal(0);
+            const subs = getVal(1);
+            const gms = getVal(2);
+            const bnds = getVal(3);
+            const secs = getVal(4);
+            const prom = getVal(5);
+            const sp = getVal(6);
+            const wat = getVal(7);
+            const rvs = getVal(8);
+            const fqs = getVal(9);
+            const cnt = getVal(10);
+            const ss = getVal(11);
+            const la = getVal(12);
+
+            if (s) setStore(asObject(s, store));
+            if (subs) setSubscriptions(asArray(subs, subscriptions));
+            if (gms) setGames(asArray(gms, games));
+            if (bnds) setBundles(asArray(bnds, bundles));
+            if (secs) setSections(asArray(secs, sections));
+            if (prom) setPromo(mergePromo(prom));
+            if (sp) setSocialProof(asObject(sp, socialProof));
+            if (wat) setWATemplates(asObject(wat, waTemplates));
+            if (rvs) {
                 const localRev = loadLocal("store_reviews_list", null);
                 if (localRev && Array.isArray(localRev) && localRev.length >= 40) {
                     setReviews(localRev);
                 } else {
-                    setReviews(asArray(rvs.data, reviews));
+                    setReviews(asArray(rvs, reviews));
                 }
             }
 
-            if (fqs?.data) {
+            if (fqs) {
                 const localFaq = loadLocal("store_faqs_list", null);
                 if (localFaq && Array.isArray(localFaq) && localFaq.length >= 8) {
                     setFaqs(localFaq);
                 } else {
-                    setFaqs(asArray(fqs.data, faqs));
+                    setFaqs(asArray(fqs, faqs));
                 }
             }
-            if (cnt?.data) setContent(mergeContent(cnt.data));
-            if (ss?.data) setSiteSettings(asObject(ss.data, siteSettings));
-            if (la?.data) setLaunchAnnouncement(mergeLaunchAnnouncement(la.data));
+            if (cnt) setContent(mergeContent(cnt));
+            if (ss) setSiteSettings(asObject(ss, siteSettings));
+            if (la) setLaunchAnnouncement(mergeLaunchAnnouncement(la));
 
             const token = getToken();
             if (token) {
