@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { useStoreData } from "../../contexts/DataContext";
-import { apiUpdateLaunchAnnouncement, apiGenerateAiLaunchTheme, formatApiError } from "../../lib/api";
+import {
+    apiUpdateLaunchAnnouncement,
+    apiGenerateAiLaunchTheme,
+    apiUpdateSections,
+    formatApiError
+} from "../../lib/api";
 import { toast } from "sonner";
 import {
     Save, Loader2, Megaphone, Sparkles, Gamepad2, Eye, EyeOff,
@@ -16,10 +21,7 @@ export default function LaunchTab({ onChanged }) {
 
     useEffect(() => {
         if (launchAnnouncement) {
-            setForm((prev) => ({
-                ...prev,
-                ...launchAnnouncement,
-            }));
+            setForm(launchAnnouncement);
         }
     }, [launchAnnouncement]);
 
