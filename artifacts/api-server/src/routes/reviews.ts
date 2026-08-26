@@ -1,31 +1,36 @@
 import { Router, type IRouter } from "express";
-import { reviews, faqs, dbSave, requireAdmin } from "../lib/storeDb.js";
+import { DEFAULT_REVIEWS, DEFAULT_FAQS, dbLoad, dbSave, requireAdmin } from "../lib/storeDb.js";
 
 const router: IRouter = Router();
 
 // ── REVIEWS ──────────────────────────────────────────────────────────────────
 
 // Public: Get Reviews
-router.get("/reviews", (_req, res) => res.json([...reviews].sort((a, b) => (a.order ?? 99) - (b.order ?? 99))));
+router.get("/reviews", async (_req, res) => {
+  const list = await dbLoad("reviews", DEFAULT_REVIEWS);
+  res.json([...list].sort((a: any, b: any) => (a.order ?? 99) - (b.order ?? 99)));
+});
 
 // Admin: Add Review
 router.post("/admin/reviews", async (req, res) => {
   if (!requireAdmin(req, res)) return;
+  const current = await dbLoad("reviews", DEFAULT_REVIEWS);
   const r = { ...req.body, id: Date.now() };
-  reviews.push(r);
-  await dbSave("reviews", reviews);
+  current.push(r);
+  await dbSave("reviews", current);
   res.json(r);
 });
 
 // Admin: Update Review
 router.put("/admin/reviews/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
+  const current = await dbLoad("reviews", DEFAULT_REVIEWS);
   const id = Number(req.params.id);
-  const idx = reviews.findIndex((x: any) => x.id === id);
+  const idx = current.findIndex((x: any) => x.id === id);
   if (idx !== -1) {
-    reviews[idx] = { ...reviews[idx], ...req.body };
-    await dbSave("reviews", reviews);
-    res.json(reviews[idx]);
+    current[idx] = { ...current[idx], ...req.body };
+    await dbSave("reviews", current);
+    res.json(current[idx]);
   } else {
     res.status(404).json({ error: "التقييم غير موجود" });
   }
@@ -34,11 +39,12 @@ router.put("/admin/reviews/:id", async (req, res) => {
 // Admin: Delete Review
 router.delete("/admin/reviews/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
+  const current = await dbLoad("reviews", DEFAULT_REVIEWS);
   const id = Number(req.params.id);
-  const idx = reviews.findIndex((x: any) => x.id === id);
+  const idx = current.findIndex((x: any) => x.id === id);
   if (idx !== -1) {
-    reviews.splice(idx, 1);
-    await dbSave("reviews", reviews);
+    current.splice(idx, 1);
+    await dbSave("reviews", current);
     res.json({ ok: true });
   } else {
     res.status(404).json({ error: "التقييم غير موجود" });
@@ -48,26 +54,31 @@ router.delete("/admin/reviews/:id", async (req, res) => {
 // ── FAQS ─────────────────────────────────────────────────────────────────────
 
 // Public: Get FAQs
-router.get("/faqs", (_req, res) => res.json([...faqs].sort((a, b) => (a.order ?? 99) - (b.order ?? 99))));
+router.get("/faqs", async (_req, res) => {
+  const list = await dbLoad("faqs", DEFAULT_FAQS);
+  res.json([...list].sort((a: any, b: any) => (a.order ?? 99) - (b.order ?? 99)));
+});
 
 // Admin: Add FAQ
 router.post("/admin/faqs", async (req, res) => {
   if (!requireAdmin(req, res)) return;
+  const current = await dbLoad("faqs", DEFAULT_FAQS);
   const f = { ...req.body, id: Date.now() };
-  faqs.push(f);
-  await dbSave("faqs", faqs);
+  current.push(f);
+  await dbSave("faqs", current);
   res.json(f);
 });
 
 // Admin: Update FAQ
 router.put("/admin/faqs/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
+  const current = await dbLoad("faqs", DEFAULT_FAQS);
   const id = Number(req.params.id);
-  const idx = faqs.findIndex((x: any) => x.id === id);
+  const idx = current.findIndex((x: any) => x.id === id);
   if (idx !== -1) {
-    faqs[idx] = { ...faqs[idx], ...req.body };
-    await dbSave("faqs", faqs);
-    res.json(faqs[idx]);
+    current[idx] = { ...current[idx], ...req.body };
+    await dbSave("faqs", current);
+    res.json(current[idx]);
   } else {
     res.status(404).json({ error: "السؤال غير موجود" });
   }
@@ -76,11 +87,12 @@ router.put("/admin/faqs/:id", async (req, res) => {
 // Admin: Delete FAQ
 router.delete("/admin/faqs/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
+  const current = await dbLoad("faqs", DEFAULT_FAQS);
   const id = Number(req.params.id);
-  const idx = faqs.findIndex((x: any) => x.id === id);
+  const idx = current.findIndex((x: any) => x.id === id);
   if (idx !== -1) {
-    faqs.splice(idx, 1);
-    await dbSave("faqs", faqs);
+    current.splice(idx, 1);
+    await dbSave("faqs", current);
     res.json({ ok: true });
   } else {
     res.status(404).json({ error: "السؤال غير موجود" });

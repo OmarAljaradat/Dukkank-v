@@ -24,7 +24,7 @@ const SECTION_CATEGORIES = {
 };
 
 export default function SectionsTab({ onChanged }) {
-    const { sections } = useStoreData();
+    const { sections, setSections } = useStoreData();
     const [items, setItems] = useState(() => (sections || []).filter((s) => !REMOVED_SECTION_IDS.includes(s.id)));
     const [saving, setSaving] = useState(false);
     const [dragIdx, setDragIdx] = useState(null);
@@ -36,36 +36,52 @@ export default function SectionsTab({ onChanged }) {
 
     const dirty = JSON.stringify(items) !== JSON.stringify((sections || []).filter((s) => !REMOVED_SECTION_IDS.includes(s.id)));
 
+    const autoSaveSections = async (newItems) => {
+        setItems(newItems);
+        if (setSections) setSections(newItems);
+        try {
+            await apiUpdateSections(
+                newItems.map((s) => ({
+                    id: s.id,
+                    label: s.label || s.id,
+                    visible: !!s.visible,
+                }))
+            );
+            onChanged?.();
+        } catch (e) {
+            toast.error(formatApiError(e));
+        }
+    };
+
     const moveTo = (from, to) => {
         if (from === to || to < 0 || to >= items.length) return;
         const next = [...items];
         const [moved] = next.splice(from, 1);
         next.splice(to, 0, moved);
-        setItems(next);
+        autoSaveSections(next);
     };
 
     const moveUp = (i) => moveTo(i, i - 1);
     const moveDown = (i) => moveTo(i, i + 1);
 
-    const toggleVisible = (i) => {
-        setItems((prev) =>
-            prev.map((s, idx) => (idx === i ? { ...s, visible: !s.visible } : s)),
-        );
+    const toggleVisible = async (i) => {
+        const next = items.map((s, idx) => (idx === i ? { ...s, visible: !s.visible } : s));
+        const item = next[i];
+        toast.success(item.visible ? `تم إظهار قسم "${item.label || item.id}" بالموقع 👁️` : `تم إخفاء قسم "${item.label || item.id}" من الموقع 🙈`);
+        await autoSaveSections(next);
     };
 
-    const showAll = () => {
-        setItems((prev) => prev.map((s) => ({ ...s, visible: true })));
+    const showAll = async () => {
+        const next = items.map((s) => ({ ...s, visible: true }));
         toast.success("تم إظهار كافة الأقسام 👁️");
+        await autoSaveSections(next);
     };
 
-    const hideNonEssential = () => {
-        setItems((prev) =>
-            prev.map((s) => {
-                const essentialKeys = ["gamelaunch", "games", "essential", "reviews"];
-                return { ...s, visible: essentialKeys.includes(s.id) };
-            }),
-        );
+    const hideNonEssential = async () => {
+        const essentialKeys = ["gamelaunch", "games", "essential", "reviews"];
+        const next = items.map((s) => ({ ...s, visible: essentialKeys.includes(s.id) }));
         toast.info("تم ترك الأقسام الأساسية فقط وإخفاء الباقي 👁️‍🗨️");
+        await autoSaveSections(next);
     };
 
     // Preset Layouts

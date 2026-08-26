@@ -1,83 +1,111 @@
 import { Router, type IRouter } from "express";
 import {
-  sections, promo, socialProof, waTemplates, content,
-  siteSettings, launchAnnouncement, dbSave, requireAdmin
+  DEFAULT_SECTIONS, DEFAULT_PROMO, DEFAULT_SOCIAL_PROOF, DEFAULT_WA_TEMPLATES,
+  DEFAULT_CONTENT, DEFAULT_SITE_SETTINGS, DEFAULT_LAUNCH_ANNOUNCEMENT,
+  dbLoad, dbSave, requireAdmin
 } from "../lib/storeDb.js";
 
 const router: IRouter = Router();
 
 // ── SECTIONS ─────────────────────────────────────────────────────────────────
-router.get("/sections", (_req, res) => res.json(sections));
+router.get("/sections", async (_req, res) => {
+  const list = await dbLoad("sections", DEFAULT_SECTIONS);
+  res.json(list);
+});
 
 router.put("/admin/sections", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  let newSecs = req.body;
+  const newSecs = req.body;
   if (Array.isArray(newSecs)) {
-    sections.length = 0;
-    sections.push(...newSecs);
-    await dbSave("sections", sections);
+    await dbSave("sections", newSecs);
+    res.json(newSecs);
+  } else {
+    res.status(400).json({ error: "تنسيق البيانات غير صحيح" });
   }
-  res.json(sections);
 });
 
 // ── LAUNCH ANNOUNCEMENT ───────────────────────────────────────────────────────
-router.get("/launch-announcement", (_req, res) => res.json(launchAnnouncement));
+router.get("/launch-announcement", async (_req, res) => {
+  const data = await dbLoad("launchAnnouncement", DEFAULT_LAUNCH_ANNOUNCEMENT);
+  res.json(data);
+});
 
 router.put("/admin/launch-announcement", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  Object.assign(launchAnnouncement, req.body);
-  await dbSave("launchAnnouncement", launchAnnouncement);
-  res.json(launchAnnouncement);
+  const current = await dbLoad("launchAnnouncement", DEFAULT_LAUNCH_ANNOUNCEMENT);
+  const updated = { ...current, ...req.body };
+  await dbSave("launchAnnouncement", updated);
+  res.json(updated);
 });
 
 // ── PROMO BANNER & OFFERS ─────────────────────────────────────────────────────
-router.get("/promo", (_req, res) => res.json(promo));
+router.get("/promo", async (_req, res) => {
+  const data = await dbLoad("promo", DEFAULT_PROMO);
+  res.json(data);
+});
 
 router.put("/admin/promo", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  Object.assign(promo, req.body);
-  await dbSave("promo", promo);
-  res.json(promo);
+  const current = await dbLoad("promo", DEFAULT_PROMO);
+  const updated = { ...DEFAULT_PROMO, ...current, ...req.body };
+  await dbSave("promo", updated);
+  res.json(updated);
 });
 
 // ── SOCIAL PROOF TOASTS ───────────────────────────────────────────────────────
-router.get("/social-proof", (_req, res) => res.json(socialProof));
+router.get("/social-proof", async (_req, res) => {
+  const data = await dbLoad("socialProof", DEFAULT_SOCIAL_PROOF);
+  res.json(data);
+});
 
 router.put("/admin/social-proof", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  Object.assign(socialProof, req.body);
-  await dbSave("socialProof", socialProof);
-  res.json(socialProof);
+  const current = await dbLoad("socialProof", DEFAULT_SOCIAL_PROOF);
+  const updated = { ...current, ...req.body };
+  await dbSave("socialProof", updated);
+  res.json(updated);
 });
 
 // ── WHATSAPP TEMPLATES ───────────────────────────────────────────────────────
-router.get("/wa-templates", (_req, res) => res.json(waTemplates));
+router.get("/wa-templates", async (_req, res) => {
+  const data = await dbLoad("waTemplates", DEFAULT_WA_TEMPLATES);
+  res.json(data);
+});
 
 router.put("/admin/wa-templates", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  Object.assign(waTemplates, req.body);
-  await dbSave("waTemplates", waTemplates);
-  res.json(waTemplates);
+  const current = await dbLoad("waTemplates", DEFAULT_WA_TEMPLATES);
+  const updated = { ...current, ...req.body };
+  await dbSave("waTemplates", updated);
+  res.json(updated);
 });
 
 // ── HERO & STORE CONTENT ──────────────────────────────────────────────────────
-router.get("/content", (_req, res) => res.json(content));
+router.get("/content", async (_req, res) => {
+  const data = await dbLoad("content", DEFAULT_CONTENT);
+  res.json(data);
+});
 
 router.put("/admin/content", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  Object.assign(content, req.body);
-  await dbSave("content", content);
-  res.json(content);
+  const current = await dbLoad("content", DEFAULT_CONTENT);
+  const updated = { ...current, ...req.body };
+  await dbSave("content", updated);
+  res.json(updated);
 });
 
 // ── SITE SETTINGS ─────────────────────────────────────────────────────────────
-router.get("/site-settings", (_req, res) => res.json(siteSettings));
+router.get("/site-settings", async (_req, res) => {
+  const data = await dbLoad("siteSettings", DEFAULT_SITE_SETTINGS);
+  res.json(data);
+});
 
 router.put("/admin/site-settings", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  Object.assign(siteSettings, req.body);
-  await dbSave("siteSettings", siteSettings);
-  res.json(siteSettings);
+  const current = await dbLoad("siteSettings", DEFAULT_SITE_SETTINGS);
+  const updated = { ...current, ...req.body };
+  await dbSave("siteSettings", updated);
+  res.json(updated);
 });
 
 export default router;

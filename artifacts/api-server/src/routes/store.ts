@@ -1,19 +1,23 @@
 import { Router, type IRouter } from "express";
 import { recordCartAdd, recordSubscriber } from "./insights.js";
 import {
-  store, dbSave, requireAdmin
+  DEFAULT_STORE, dbLoad, dbSave, requireAdmin
 } from "../lib/storeDb.js";
 
 const router: IRouter = Router();
 
 // ── Store Data ────────────────────────────────────────────────────────────────
-router.get("/store", (_req, res) => res.json(store));
+router.get("/store", async (_req, res) => {
+  const data = await dbLoad("store", DEFAULT_STORE);
+  res.json(data);
+});
 
 router.put("/admin/store", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  Object.assign(store, req.body);
-  await dbSave("store", store);
-  res.json(store);
+  const current = await dbLoad("store", DEFAULT_STORE);
+  const updated = { ...current, ...req.body };
+  await dbSave("store", updated);
+  res.json(updated);
 });
 
 // ── SEO Endpoints ──────────────────────────────────────────────────────────────

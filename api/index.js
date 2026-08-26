@@ -47839,79 +47839,91 @@ var store_default = router9;
 // artifacts/api-server/src/routes/games.ts
 var import_express10 = __toESM(require_express2(), 1);
 var router10 = (0, import_express10.Router)();
-router10.get("/games", (_req, res) => {
-  res.json([...games].filter((g) => g.available !== false).sort((a, b) => (a.order ?? 99) - (b.order ?? 99)));
+router10.get("/games", async (_req, res) => {
+  const list = await dbLoad("games", DEFAULT_GAMES);
+  res.json([...list].filter((g) => g.available !== false).sort((a, b) => (a.order ?? 99) - (b.order ?? 99)));
 });
-router10.get("/admin/games", (req, res) => {
+router10.get("/admin/games", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  res.json(games);
+  const list = await dbLoad("games", DEFAULT_GAMES);
+  res.json(list);
 });
 router10.post("/admin/games", async (req, res) => {
   if (!requireAdmin(req, res)) return;
+  const current = await dbLoad("games", DEFAULT_GAMES);
   const game = { ...req.body, id: req.body.id || `game-${Date.now()}` };
-  games.push(game);
-  await dbSave("games", games);
+  current.push(game);
+  await dbSave("games", current);
   res.json(game);
 });
 router10.put("/admin/games/reorder", async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const { orderedIds } = req.body || {};
+  const current = await dbLoad("games", DEFAULT_GAMES);
   if (Array.isArray(orderedIds)) {
     orderedIds.forEach((id, idx) => {
-      const g = games.find((x) => x.id === id);
+      const g = current.find((x) => x.id === id);
       if (g) g.order = idx;
     });
-    await dbSave("games", games);
+    await dbSave("games", current);
   }
-  res.json({ ok: true, games });
+  res.json({ ok: true, games: current });
 });
 router10.put("/admin/games/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  const idx = games.findIndex((g) => g.id === req.params.id);
+  const current = await dbLoad("games", DEFAULT_GAMES);
+  const idx = current.findIndex((g) => g.id === req.params.id);
   if (idx !== -1) {
-    games[idx] = { ...games[idx], ...req.body };
-    await dbSave("games", games);
-    res.json(games[idx]);
+    current[idx] = { ...current[idx], ...req.body };
+    await dbSave("games", current);
+    res.json(current[idx]);
   } else {
     res.status(404).json({ error: "\u0627\u0644\u0644\u0639\u0628\u0629 \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F\u0629" });
   }
 });
 router10.delete("/admin/games/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  const idx = games.findIndex((g) => g.id === req.params.id);
+  const current = await dbLoad("games", DEFAULT_GAMES);
+  const idx = current.findIndex((g) => g.id === req.params.id);
   if (idx !== -1) {
-    games.splice(idx, 1);
-    await dbSave("games", games);
+    current.splice(idx, 1);
+    await dbSave("games", current);
     res.json({ ok: true });
   } else {
     res.status(404).json({ error: "\u0627\u0644\u0644\u0639\u0628\u0629 \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F\u0629" });
   }
 });
-router10.get("/bundles", (_req, res) => res.json(bundles));
+router10.get("/bundles", async (_req, res) => {
+  const list = await dbLoad("bundles", DEFAULT_BUNDLES);
+  res.json(list);
+});
 router10.post("/admin/bundles", async (req, res) => {
   if (!requireAdmin(req, res)) return;
+  const current = await dbLoad("bundles", DEFAULT_BUNDLES);
   const b = { ...req.body, id: req.body.id || `bundle-${Date.now()}` };
-  bundles.push(b);
-  await dbSave("bundles", bundles);
+  current.push(b);
+  await dbSave("bundles", current);
   res.json(b);
 });
 router10.put("/admin/bundles/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  const idx = bundles.findIndex((b) => b.id === req.params.id);
+  const current = await dbLoad("bundles", DEFAULT_BUNDLES);
+  const idx = current.findIndex((b) => b.id === req.params.id);
   if (idx !== -1) {
-    bundles[idx] = { ...bundles[idx], ...req.body };
-    await dbSave("bundles", bundles);
-    res.json(bundles[idx]);
+    current[idx] = { ...current[idx], ...req.body };
+    await dbSave("bundles", current);
+    res.json(current[idx]);
   } else {
     res.status(404).json({ error: "\u0627\u0644\u0628\u0627\u0642\u0629 \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F\u0629" });
   }
 });
 router10.delete("/admin/bundles/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  const idx = bundles.findIndex((b) => b.id === req.params.id);
+  const current = await dbLoad("bundles", DEFAULT_BUNDLES);
+  const idx = current.findIndex((b) => b.id === req.params.id);
   if (idx !== -1) {
-    bundles.splice(idx, 1);
-    await dbSave("bundles", bundles);
+    current.splice(idx, 1);
+    await dbSave("bundles", current);
     res.json({ ok: true });
   } else {
     res.status(404).json({ error: "\u0627\u0644\u0628\u0627\u0642\u0629 \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F\u0629" });
@@ -47922,31 +47934,37 @@ var games_default = router10;
 // artifacts/api-server/src/routes/subscriptions.ts
 var import_express11 = __toESM(require_express2(), 1);
 var router11 = (0, import_express11.Router)();
-router11.get("/subscriptions", (_req, res) => res.json(subscriptions));
+router11.get("/subscriptions", async (_req, res) => {
+  const list = await dbLoad("subscriptions", DEFAULT_SUBSCRIPTIONS);
+  res.json(list);
+});
 router11.post("/admin/subscriptions", async (req, res) => {
   if (!requireAdmin(req, res)) return;
+  const current = await dbLoad("subscriptions", DEFAULT_SUBSCRIPTIONS);
   const sub = { ...req.body, id: req.body.id || `sub-${Date.now()}` };
-  subscriptions.push(sub);
-  await dbSave("subscriptions", subscriptions);
+  current.push(sub);
+  await dbSave("subscriptions", current);
   res.json(sub);
 });
 router11.put("/admin/subscriptions/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  const idx = subscriptions.findIndex((s) => s.id === req.params.id);
+  const current = await dbLoad("subscriptions", DEFAULT_SUBSCRIPTIONS);
+  const idx = current.findIndex((s) => s.id === req.params.id);
   if (idx !== -1) {
-    subscriptions[idx] = { ...subscriptions[idx], ...req.body };
-    await dbSave("subscriptions", subscriptions);
-    res.json(subscriptions[idx]);
+    current[idx] = { ...current[idx], ...req.body };
+    await dbSave("subscriptions", current);
+    res.json(current[idx]);
   } else {
     res.status(404).json({ error: "\u0627\u0644\u0627\u0634\u062A\u0631\u0627\u0643 \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F" });
   }
 });
 router11.delete("/admin/subscriptions/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  const idx = subscriptions.findIndex((s) => s.id === req.params.id);
+  const current = await dbLoad("subscriptions", DEFAULT_SUBSCRIPTIONS);
+  const idx = current.findIndex((s) => s.id === req.params.id);
   if (idx !== -1) {
-    subscriptions.splice(idx, 1);
-    await dbSave("subscriptions", subscriptions);
+    current.splice(idx, 1);
+    await dbSave("subscriptions", current);
     res.json({ ok: true });
   } else {
     res.status(404).json({ error: "\u0627\u0644\u0627\u0634\u062A\u0631\u0627\u0643 \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F" });
@@ -47957,65 +47975,77 @@ var subscriptions_default = router11;
 // artifacts/api-server/src/routes/reviews.ts
 var import_express12 = __toESM(require_express2(), 1);
 var router12 = (0, import_express12.Router)();
-router12.get("/reviews", (_req, res) => res.json([...reviews].sort((a, b) => (a.order ?? 99) - (b.order ?? 99))));
+router12.get("/reviews", async (_req, res) => {
+  const list = await dbLoad("reviews", DEFAULT_REVIEWS);
+  res.json([...list].sort((a, b) => (a.order ?? 99) - (b.order ?? 99)));
+});
 router12.post("/admin/reviews", async (req, res) => {
   if (!requireAdmin(req, res)) return;
+  const current = await dbLoad("reviews", DEFAULT_REVIEWS);
   const r = { ...req.body, id: Date.now() };
-  reviews.push(r);
-  await dbSave("reviews", reviews);
+  current.push(r);
+  await dbSave("reviews", current);
   res.json(r);
 });
 router12.put("/admin/reviews/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
+  const current = await dbLoad("reviews", DEFAULT_REVIEWS);
   const id = Number(req.params.id);
-  const idx = reviews.findIndex((x) => x.id === id);
+  const idx = current.findIndex((x) => x.id === id);
   if (idx !== -1) {
-    reviews[idx] = { ...reviews[idx], ...req.body };
-    await dbSave("reviews", reviews);
-    res.json(reviews[idx]);
+    current[idx] = { ...current[idx], ...req.body };
+    await dbSave("reviews", current);
+    res.json(current[idx]);
   } else {
     res.status(404).json({ error: "\u0627\u0644\u062A\u0642\u064A\u064A\u0645 \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F" });
   }
 });
 router12.delete("/admin/reviews/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
+  const current = await dbLoad("reviews", DEFAULT_REVIEWS);
   const id = Number(req.params.id);
-  const idx = reviews.findIndex((x) => x.id === id);
+  const idx = current.findIndex((x) => x.id === id);
   if (idx !== -1) {
-    reviews.splice(idx, 1);
-    await dbSave("reviews", reviews);
+    current.splice(idx, 1);
+    await dbSave("reviews", current);
     res.json({ ok: true });
   } else {
     res.status(404).json({ error: "\u0627\u0644\u062A\u0642\u064A\u064A\u0645 \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F" });
   }
 });
-router12.get("/faqs", (_req, res) => res.json([...faqs].sort((a, b) => (a.order ?? 99) - (b.order ?? 99))));
+router12.get("/faqs", async (_req, res) => {
+  const list = await dbLoad("faqs", DEFAULT_FAQS);
+  res.json([...list].sort((a, b) => (a.order ?? 99) - (b.order ?? 99)));
+});
 router12.post("/admin/faqs", async (req, res) => {
   if (!requireAdmin(req, res)) return;
+  const current = await dbLoad("faqs", DEFAULT_FAQS);
   const f = { ...req.body, id: Date.now() };
-  faqs.push(f);
-  await dbSave("faqs", faqs);
+  current.push(f);
+  await dbSave("faqs", current);
   res.json(f);
 });
 router12.put("/admin/faqs/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
+  const current = await dbLoad("faqs", DEFAULT_FAQS);
   const id = Number(req.params.id);
-  const idx = faqs.findIndex((x) => x.id === id);
+  const idx = current.findIndex((x) => x.id === id);
   if (idx !== -1) {
-    faqs[idx] = { ...faqs[idx], ...req.body };
-    await dbSave("faqs", faqs);
-    res.json(faqs[idx]);
+    current[idx] = { ...current[idx], ...req.body };
+    await dbSave("faqs", current);
+    res.json(current[idx]);
   } else {
     res.status(404).json({ error: "\u0627\u0644\u0633\u0624\u0627\u0644 \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F" });
   }
 });
 router12.delete("/admin/faqs/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
+  const current = await dbLoad("faqs", DEFAULT_FAQS);
   const id = Number(req.params.id);
-  const idx = faqs.findIndex((x) => x.id === id);
+  const idx = current.findIndex((x) => x.id === id);
   if (idx !== -1) {
-    faqs.splice(idx, 1);
-    await dbSave("faqs", faqs);
+    current.splice(idx, 1);
+    await dbSave("faqs", current);
     res.json({ ok: true });
   } else {
     res.status(404).json({ error: "\u0627\u0644\u0633\u0624\u0627\u0644 \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F" });
@@ -48026,58 +48056,85 @@ var reviews_default = router12;
 // artifacts/api-server/src/routes/promo.ts
 var import_express13 = __toESM(require_express2(), 1);
 var router13 = (0, import_express13.Router)();
-router13.get("/sections", (_req, res) => res.json(sections));
+router13.get("/sections", async (_req, res) => {
+  const list = await dbLoad("sections", DEFAULT_SECTIONS);
+  res.json(list);
+});
 router13.put("/admin/sections", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  let newSecs = req.body;
+  const newSecs = req.body;
   if (Array.isArray(newSecs)) {
-    sections.length = 0;
-    sections.push(...newSecs);
-    await dbSave("sections", sections);
+    await dbSave("sections", newSecs);
+    res.json(newSecs);
+  } else {
+    res.status(400).json({ error: "تنسيق البيانات غير صحيح" });
   }
-  res.json(sections);
 });
-router13.get("/launch-announcement", (_req, res) => res.json(launchAnnouncement));
+router13.get("/launch-announcement", async (_req, res) => {
+  const data = await dbLoad("launchAnnouncement", DEFAULT_LAUNCH_ANNOUNCEMENT);
+  res.json(data);
+});
 router13.put("/admin/launch-announcement", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  Object.assign(launchAnnouncement, req.body);
-  await dbSave("launchAnnouncement", launchAnnouncement);
-  res.json(launchAnnouncement);
+  const current = await dbLoad("launchAnnouncement", DEFAULT_LAUNCH_ANNOUNCEMENT);
+  const updated = { ...current, ...req.body };
+  await dbSave("launchAnnouncement", updated);
+  res.json(updated);
 });
-router13.get("/promo", (_req, res) => res.json(promo));
+router13.get("/promo", async (_req, res) => {
+  const data = await dbLoad("promo", DEFAULT_PROMO);
+  res.json(data);
+});
 router13.put("/admin/promo", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  Object.assign(promo, req.body);
-  await dbSave("promo", promo);
-  res.json(promo);
+  const current = await dbLoad("promo", DEFAULT_PROMO);
+  const updated = { ...DEFAULT_PROMO, ...current, ...req.body };
+  await dbSave("promo", updated);
+  res.json(updated);
 });
-router13.get("/social-proof", (_req, res) => res.json(socialProof));
+router13.get("/social-proof", async (_req, res) => {
+  const data = await dbLoad("socialProof", DEFAULT_SOCIAL_PROOF);
+  res.json(data);
+});
 router13.put("/admin/social-proof", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  Object.assign(socialProof, req.body);
-  await dbSave("socialProof", socialProof);
-  res.json(socialProof);
+  const current = await dbLoad("socialProof", DEFAULT_SOCIAL_PROOF);
+  const updated = { ...current, ...req.body };
+  await dbSave("socialProof", updated);
+  res.json(updated);
 });
-router13.get("/wa-templates", (_req, res) => res.json(waTemplates));
+router13.get("/wa-templates", async (_req, res) => {
+  const data = await dbLoad("waTemplates", DEFAULT_WA_TEMPLATES);
+  res.json(data);
+});
 router13.put("/admin/wa-templates", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  Object.assign(waTemplates, req.body);
-  await dbSave("waTemplates", waTemplates);
-  res.json(waTemplates);
+  const current = await dbLoad("waTemplates", DEFAULT_WA_TEMPLATES);
+  const updated = { ...current, ...req.body };
+  await dbSave("waTemplates", updated);
+  res.json(updated);
 });
-router13.get("/content", (_req, res) => res.json(content));
+router13.get("/content", async (_req, res) => {
+  const data = await dbLoad("content", DEFAULT_CONTENT);
+  res.json(data);
+});
 router13.put("/admin/content", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  Object.assign(content, req.body);
-  await dbSave("content", content);
-  res.json(content);
+  const current = await dbLoad("content", DEFAULT_CONTENT);
+  const updated = { ...current, ...req.body };
+  await dbSave("content", updated);
+  res.json(updated);
 });
-router13.get("/site-settings", (_req, res) => res.json(siteSettings));
+router13.get("/site-settings", async (_req, res) => {
+  const data = await dbLoad("siteSettings", DEFAULT_SITE_SETTINGS);
+  res.json(data);
+});
 router13.put("/admin/site-settings", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  Object.assign(siteSettings, req.body);
-  await dbSave("siteSettings", siteSettings);
-  res.json(siteSettings);
+  const current = await dbLoad("siteSettings", DEFAULT_SITE_SETTINGS);
+  const updated = { ...current, ...req.body };
+  await dbSave("siteSettings", updated);
+  res.json(updated);
 });
 var promo_default = router13;
 
