@@ -396,7 +396,89 @@ export default function AffiliateTab() {
                             >
                                 <X className="w-5 h-5" />
                             </button>
-            </div>
+                        </div>
+
+                        <form onSubmit={handleSave} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">اسم المسوّق / الشريك</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={form.name}
+                                    onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                                    placeholder="مثال: يوتيوبر جيمينج أو شريك معتمد"
+                                    className="w-full h-11 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">كود الخصم (Coupon Code)</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={form.code}
+                                        onChange={(e) => setForm((prev) => ({ ...prev, code: e.target.value }))}
+                                        placeholder="مثال: GAMER10"
+                                        className="w-full h-11 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-blue-600 uppercase"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">رقم الواتساب</label>
+                                    <input
+                                        type="text"
+                                        value={form.phone}
+                                        onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
+                                        placeholder="962770000000"
+                                        className="w-full h-11 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">نوع العمولة</label>
+                                    <select
+                                        value={form.commissionType}
+                                        onChange={(e) => setForm((prev) => ({ ...prev, commissionType: e.target.value }))}
+                                        className="w-full h-11 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white"
+                                    >
+                                        <option value="percent">نسبة مئوية (%)</option>
+                                        <option value="fixed">مبلغ ثابت لكل طلب ($)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">قيمة العمولة</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        step="0.5"
+                                        value={form.commissionRate}
+                                        onChange={(e) => setForm((prev) => ({ ...prev, commissionRate: parseFloat(e.target.value) || 0 }))}
+                                        className="w-full h-11 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowModal(false)}
+                                    className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                                >
+                                    إلغاء
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow transition cursor-pointer"
+                                >
+                                    حفظ البيانات ✅
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
