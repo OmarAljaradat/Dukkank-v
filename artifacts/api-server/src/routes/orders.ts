@@ -364,14 +364,8 @@ router.put("/admin/store-orders/:id/complete", async (req, res) => {
 
 router.get("/admin/suppliers", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  if (pool) {
-    try {
-      const { rows } = await pool.query("SELECT * FROM suppliers ORDER BY created_at DESC");
-      res.json(rows);
-      return;
-    } catch (e) {}
-  }
-  res.json(suppliers);
+  const list = await dbLoad("suppliers", memSuppliers);
+  res.json(Array.isArray(list) ? list : memSuppliers);
 });
 
 router.post("/admin/suppliers", async (req, res) => {
@@ -379,26 +373,19 @@ router.post("/admin/suppliers", async (req, res) => {
   const { name, phone, notes } = req.body || {};
   if (!name || !phone) { res.status(400).json({ error: "اسم المورد ورقم الهاتف مطلوبان" }); return; }
 
-  if (pool) {
-    try {
-      const { rows } = await pool.query(
-        `INSERT INTO suppliers (name, phone, notes) VALUES ($1, $2, $3) RETURNING *`,
-        [String(name).trim(), String(phone).trim(), notes || null]
-      );
-      res.status(201).json(rows[0]);
-      return;
-    } catch (e) {}
-  }
+  const list = await dbLoad("suppliers", memSuppliers);
+  const arr = Array.isArray(list) ? [...list] : [...memSuppliers];
 
   const newSupplier: Supplier = {
     id: Date.now(),
     name: String(name).trim(),
     phone: String(phone).trim(),
-    notes: notes || undefined,
+    notes: notes ? String(notes).trim() : undefined,
     is_active: true,
     created_at: new Date().toISOString()
   };
-  suppliers.unshift(newSupplier);
+  arr.unshift(newSupplier);
+  await dbSave("suppliers", arr);
   res.status(201).json(newSupplier);
 });
 
@@ -407,37 +394,33 @@ router.put("/admin/suppliers/:id", async (req, res) => {
   const id = req.params.id;
   const { name, phone, notes, is_active } = req.body || {};
 
-  if (pool) {
-    try {
-      const { rows } = await pool.query(
-        `UPDATE suppliers SET name=COALESCE($1,name), phone=COALESCE($2,phone), notes=COALESCE($3,notes), is_active=COALESCE($4,is_active) WHERE id=$5 RETURNING *`,
-        [name, phone, notes, is_active, id]
-      );
-      if (rows.length > 0) { res.json(rows[0]); return; }
-    } catch (e) {}
-  }
+  const list = await dbLoad("suppliers", memSuppliers);
+  const arr = Array.isArray(list) ? [...list] : [...memSuppliers];
 
-  const idx = suppliers.findIndex(s => String(s.id) === String(id));
+  const idx = arr.findIndex(s => String(s.id) === String(id));
   if (idx === -1) { res.status(404).json({ error: "المورد غير موجود" }); return; }
-  if (name !== undefined) suppliers[idx].name = name;
-  if (phone !== undefined) suppliers[idx].phone = phone;
-  if (notes !== undefined) suppliers[idx].notes = notes;
-  if (is_active !== undefined) suppliers[idx].is_active = is_active;
-  res.json(suppliers[idx]);
+
+  arr[idx] = {
+    ...arr[idx],
+    ...(name !== undefined ? { name: String(name).trim() } : {}),
+    ...(phone !== undefined ? { phone: String(phone).trim() } : {}),
+    ...(notes !== undefined ? { notes: notes ? String(notes).trim() : undefined } : {}),
+    ...(is_active !== undefined ? { is_active: !!is_active } : {})
+  };
+  await dbSave("suppliers", arr);
+  res.json(arr[idx]);
 });
 
 router.delete("/admin/suppliers/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const id = req.params.id;
 
-  if (pool) {
-    try {
-      await pool.query("DELETE FROM suppliers WHERE id=$1", [id]);
-    } catch (e) {}
-  }
-
-  const idx = suppliers.findIndex(s => String(s.id) === String(id));
-  if (idx !== -1) suppliers.splice(idx, 1);
+  const list = await dbLoad("suppliers", memSuppliers);
+  const arr = Array.isArray(list) ? [...list] : [...memSuppliers];
+  const next = arr.filter(s => String(s.id) !== String(id));
+  await dbSave("suppliers", next);
+  res.json({ ok: true });
+});
   res.json({ ok: true });
 });
 

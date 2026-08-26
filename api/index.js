@@ -47499,84 +47499,58 @@ router7.put("/admin/store-orders/:id/complete", async (req, res) => {
 });
 router7.get("/admin/suppliers", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  if (pool6) {
-    try {
-      const { rows } = await pool6.query("SELECT * FROM suppliers ORDER BY created_at DESC");
-      res.json(rows);
-      return;
-    } catch (e) {
-    }
-  }
-  res.json(suppliers);
+  const list = await dbLoad("suppliers", suppliers);
+  res.json(Array.isArray(list) ? list : suppliers);
 });
 router7.post("/admin/suppliers", async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const { name, phone, notes } = req.body || {};
   if (!name || !phone) {
-    res.status(400).json({ error: "\u0627\u0633\u0645 \u0627\u0644\u0645\u0648\u0631\u062F \u0648\u0631\u0642\u0645 \u0627\u0644\u0647\u0627\u062A\u0641 \u0645\u0637\u0644\u0648\u0628\u0627\u0646" });
+    res.status(400).json({ error: "اسم المورد ورقم الهاتف مطلوبان" });
     return;
   }
-  if (pool6) {
-    try {
-      const { rows } = await pool6.query(
-        `INSERT INTO suppliers (name, phone, notes) VALUES ($1, $2, $3) RETURNING *`,
-        [String(name).trim(), String(phone).trim(), notes || null]
-      );
-      res.status(201).json(rows[0]);
-      return;
-    } catch (e) {
-    }
-  }
+  const list = await dbLoad("suppliers", suppliers);
+  const arr = Array.isArray(list) ? [...list] : [...suppliers];
   const newSupplier = {
     id: Date.now(),
     name: String(name).trim(),
     phone: String(phone).trim(),
-    notes: notes || void 0,
+    notes: notes ? String(notes).trim() : void 0,
     is_active: true,
     created_at: (/* @__PURE__ */ new Date()).toISOString()
   };
-  suppliers.unshift(newSupplier);
+  arr.unshift(newSupplier);
+  await dbSave("suppliers", arr);
   res.status(201).json(newSupplier);
 });
 router7.put("/admin/suppliers/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const id = req.params.id;
   const { name, phone, notes, is_active } = req.body || {};
-  if (pool6) {
-    try {
-      const { rows } = await pool6.query(
-        `UPDATE suppliers SET name=COALESCE($1,name), phone=COALESCE($2,phone), notes=COALESCE($3,notes), is_active=COALESCE($4,is_active) WHERE id=$5 RETURNING *`,
-        [name, phone, notes, is_active, id]
-      );
-      if (rows.length > 0) {
-        res.json(rows[0]);
-        return;
-      }
-    } catch (e) {
-    }
-  }
-  const idx = suppliers.findIndex((s) => String(s.id) === String(id));
+  const list = await dbLoad("suppliers", suppliers);
+  const arr = Array.isArray(list) ? [...list] : [...suppliers];
+  const idx = arr.findIndex((s) => String(s.id) === String(id));
   if (idx === -1) {
-    res.status(404).json({ error: "\u0627\u0644\u0645\u0648\u0631\u062F \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F" });
+    res.status(404).json({ error: "المورد غير موجود" });
     return;
   }
-  if (name !== void 0) suppliers[idx].name = name;
-  if (phone !== void 0) suppliers[idx].phone = phone;
-  if (notes !== void 0) suppliers[idx].notes = notes;
-  if (is_active !== void 0) suppliers[idx].is_active = is_active;
-  res.json(suppliers[idx]);
+  arr[idx] = {
+    ...arr[idx],
+    ...(name !== void 0 ? { name: String(name).trim() } : {}),
+    ...(phone !== void 0 ? { phone: String(phone).trim() } : {}),
+    ...(notes !== void 0 ? { notes: notes ? String(notes).trim() : void 0 } : {}),
+    ...(is_active !== void 0 ? { is_active: !!is_active } : {})
+  };
+  await dbSave("suppliers", arr);
+  res.json(arr[idx]);
 });
 router7.delete("/admin/suppliers/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const id = req.params.id;
-  if (pool6) {
-    try {
-      await pool6.query("DELETE FROM suppliers WHERE id=$1", [id]);
-    } catch (e) {
-    }
-  }
-  const idx = suppliers.findIndex((s) => String(s.id) === String(id));
-  if (idx !== -1) suppliers.splice(idx, 1);
+  const list = await dbLoad("suppliers", suppliers);
+  const arr = Array.isArray(list) ? [...list] : [...suppliers];
+  const next = arr.filter((s) => String(s.id) !== String(id));
+  await dbSave("suppliers", next);
   res.json({ ok: true });
 });
 router7.get("/admin/customer-profile/:phone", async (req, res) => {
