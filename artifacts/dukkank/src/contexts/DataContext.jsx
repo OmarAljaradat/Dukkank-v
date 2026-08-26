@@ -324,21 +324,22 @@ export function DataProvider({ children }) {
     const fetchAll = useCallback(async () => {
         try {
             setLoading(true);
+            const t = Date.now();
             const results = await Promise.allSettled([
-                axios.get(`${API}/store`),
-                axios.get(`${API}/subscriptions`),
-                axios.get(`${API}/games`),
-                axios.get(`${API}/bundles`),
-                axios.get(`${API}/sections`),
-                axios.get(`${API}/promo`),
-                axios.get(`${API}/social-proof`),
-                axios.get(`${API}/wa-templates`),
-                axios.get(`${API}/reviews`),
-                axios.get(`${API}/faqs`),
-                axios.get(`${API}/content`),
-                axios.get(`${API}/site-settings`),
-                axios.get(`${API}/launch-announcement`),
-                axios.get(`${API}/theme`),
+                axios.get(`${API}/store?t=${t}`),
+                axios.get(`${API}/subscriptions?t=${t}`),
+                axios.get(`${API}/games?t=${t}`),
+                axios.get(`${API}/bundles?t=${t}`),
+                axios.get(`${API}/sections?t=${t}`),
+                axios.get(`${API}/promo?t=${t}`),
+                axios.get(`${API}/social-proof?t=${t}`),
+                axios.get(`${API}/wa-templates?t=${t}`),
+                axios.get(`${API}/reviews?t=${t}`),
+                axios.get(`${API}/faqs?t=${t}`),
+                axios.get(`${API}/content?t=${t}`),
+                axios.get(`${API}/site-settings?t=${t}`),
+                axios.get(`${API}/launch-announcement?t=${t}`),
+                axios.get(`${API}/theme?t=${t}`),
             ]);
 
             const getVal = (idx) => (results[idx]?.status === "fulfilled" ? results[idx].value?.data : null);

@@ -47,11 +47,14 @@ const globalLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Security & compatibility headers
+// Security & compatibility headers with strict anti-caching for real-time live sync
 app.use((_req: Request, res: Response, next: NextFunction) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "no-referrer-when-downgrade");
   res.setHeader("Permissions-Policy", "interest-cohort=()");
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
   next();
 });
 

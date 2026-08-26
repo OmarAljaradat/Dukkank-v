@@ -48520,6 +48520,9 @@ app.use((_req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "no-referrer-when-downgrade");
   res.setHeader("Permissions-Policy", "interest-cohort=()");
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
   next();
 });
 app.use(import_express17.default.json({ limit: "50mb" }));
