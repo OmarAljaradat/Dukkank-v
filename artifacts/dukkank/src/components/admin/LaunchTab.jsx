@@ -455,28 +455,39 @@ https://dukkank.com`;
             {/* 🎮 Major Game Launch Presets Bar */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* 🌴 GTA VI Vice City Quick Preset */}
-                <div className="relative rounded-3xl overflow-hidden border border-pink-500/30 shadow-xl bg-slate-900/90 p-5 flex flex-col justify-between space-y-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
-                            style={{
-                                background: "linear-gradient(135deg, rgba(255,45,120,0.25), rgba(0,229,255,0.15))",
-                                border: "1px solid rgba(255,45,120,0.3)",
-                            }}>
-                            <span className="text-xl font-black" style={{
-                                background: "linear-gradient(130deg, #ff2d78, #ffd700, #00e5ff)",
-                                WebkitBackgroundClip: "text",
-                                WebkitTextFillColor: "transparent",
-                            }}>VI</span>
-                        </div>
-                        <div>
-                            <div className="text-xs font-black text-white flex items-center gap-1.5">
-                                <span>🌴 GTA VI — Vice City Theme</span>
-                                <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-pink-500/20 text-pink-300">ROCKSTAR</span>
+                <div className={`relative rounded-3xl overflow-hidden shadow-xl bg-slate-900/90 p-5 flex flex-col justify-between space-y-4 transition-all duration-300 ${
+                    form.theme === "vice"
+                        ? "border-2 border-pink-500 ring-2 ring-pink-500/30 shadow-pink-500/20"
+                        : "border border-pink-500/20 opacity-80 hover:opacity-100"
+                }`}>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                                style={{
+                                    background: "linear-gradient(135deg, rgba(255,45,120,0.25), rgba(0,229,255,0.15))",
+                                    border: "1px solid rgba(255,45,120,0.3)",
+                                }}>
+                                <span className="text-xl font-black" style={{
+                                    background: "linear-gradient(130deg, #ff2d78, #ffd700, #00e5ff)",
+                                    WebkitBackgroundClip: "text",
+                                    WebkitTextFillColor: "transparent",
+                                }}>VI</span>
                             </div>
-                            <p className="text-[11px] text-slate-400 font-medium mt-0.5">
-                                ثيم Vice City النيون مع الخلفية واللوقو الشفاف والعداد التنازلي
-                            </p>
+                            <div>
+                                <div className="text-xs font-black text-white flex items-center gap-1.5">
+                                    <span>🌴 GTA VI — Vice City Theme</span>
+                                    <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-pink-500/20 text-pink-300">ROCKSTAR</span>
+                                </div>
+                                <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+                                    ثيم Vice City النيون مع الخلفية واللوقو الشفاف والعداد التنازلي
+                                </p>
+                            </div>
                         </div>
+                        {form.theme === "vice" && (
+                            <span className="px-2.5 py-1 rounded-full bg-pink-500/20 border border-pink-500/50 text-pink-300 text-[10px] font-black shrink-0">
+                                ✅ المفعّل حالياً
+                            </span>
+                        )}
                     </div>
                     <button
                         type="button"
@@ -488,25 +499,36 @@ https://dukkank.com`;
                         }}
                     >
                         <Flame className="w-4 h-4" />
-                        <span>تفعيل ثيم GTA VI 🎮</span>
+                        <span>{form.theme === "vice" ? "✅ ثيم GTA VI مفعّل حالياً بالمتجر" : "تفعيل ثيم GTA VI 🎮"}</span>
                     </button>
                 </div>
 
                 {/* ⚽ EA SPORTS FC Quick Preset */}
-                <div className="relative rounded-3xl overflow-hidden border border-emerald-500/30 shadow-xl bg-slate-900/90 p-5 flex flex-col justify-between space-y-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-black text-lg">
-                            ⚽
-                        </div>
-                        <div>
-                            <div className="text-xs font-black text-white flex items-center gap-1.5">
-                                <span>⚽ EA SPORTS FC Theme</span>
-                                <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">EA SPORTS</span>
+                <div className={`relative rounded-3xl overflow-hidden shadow-xl bg-slate-900/90 p-5 flex flex-col justify-between space-y-4 transition-all duration-300 ${
+                    form.theme === "eafc"
+                        ? "border-2 border-emerald-400 ring-2 ring-emerald-400/30 shadow-emerald-400/20"
+                        : "border border-emerald-500/20 opacity-80 hover:opacity-100"
+                }`}>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-black text-lg">
+                                ⚽
                             </div>
-                            <p className="text-[11px] text-slate-400 font-medium mt-0.5">
-                                ثيم الملعب الكروي مع الألوان الفسفورية وهدايا الـ FC Points
-                            </p>
+                            <div>
+                                <div className="text-xs font-black text-white flex items-center gap-1.5">
+                                    <span>⚽ EA SPORTS FC Theme</span>
+                                    <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">EA SPORTS</span>
+                                </div>
+                                <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+                                    ثيم الملعب الكروي مع الألوان الفسفورية وهدايا الـ FC Points
+                                </p>
+                            </div>
                         </div>
+                        {form.theme === "eafc" && (
+                            <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-[10px] font-black shrink-0">
+                                ✅ المفعّل حالياً
+                            </span>
+                        )}
                     </div>
                     <button
                         type="button"
@@ -514,7 +536,7 @@ https://dukkank.com`;
                         className="w-full py-2.5 rounded-xl font-black text-xs text-slate-950 transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-400 to-teal-300 shadow-[0_4px_15px_rgba(52,211,153,0.3)]"
                     >
                         <Zap className="w-4 h-4" />
-                        <span>تفعيل ثيم EA SPORTS FC ⚽</span>
+                        <span>{form.theme === "eafc" ? "✅ ثيم EA SPORTS FC مفعّل حالياً بالمتجر" : "تفعيل ثيم EA SPORTS FC ⚽"}</span>
                     </button>
                 </div>
             </div>

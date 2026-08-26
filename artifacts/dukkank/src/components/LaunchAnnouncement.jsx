@@ -71,6 +71,16 @@ export function LaunchHeroBanner() {
     const getGameThemeStyle = () => {
         const theme = la.theme || "gold";
         switch (theme) {
+            case "eafc":
+            case "green":
+            case "emerald":
+                return {
+                    accentText: "text-emerald-400",
+                    accentBg: "bg-emerald-500/20 border-emerald-500/60 text-emerald-300",
+                    gradientOverlay: "from-emerald-950/90 via-slate-950/90 to-black/95",
+                    glowColor: "rgba(16, 185, 129, 0.35)",
+                    btnBg: "from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950",
+                };
             case "red":
                 return {
                     accentText: "text-red-400",
