@@ -305,10 +305,7 @@ export function DataProvider({ children }) {
 
     const mergeLaunchAnnouncement = (fetched) => {
         if (!fetched || typeof fetched !== "object" || Array.isArray(fetched)) return launchAnnouncement;
-        return {
-            ...FALLBACK_LAUNCH_ANNOUNCEMENT,
-            ...fetched,
-        };
+        return fetched;
     };
 
     const asArray = (v, fallback) => (Array.isArray(v) && v.length > 0 ? v : fallback);

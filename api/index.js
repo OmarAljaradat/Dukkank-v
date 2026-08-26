@@ -48071,12 +48071,11 @@ router13.put("/admin/sections", async (req, res) => {
 });
 router13.get("/launch-announcement", async (_req, res) => {
   const data = await dbLoad("launchAnnouncement", DEFAULT_LAUNCH_ANNOUNCEMENT);
-  res.json({ ...DEFAULT_LAUNCH_ANNOUNCEMENT, ...data });
+  res.json(data);
 });
 router13.put("/admin/launch-announcement", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  const current = await dbLoad("launchAnnouncement", DEFAULT_LAUNCH_ANNOUNCEMENT);
-  const updated = { ...DEFAULT_LAUNCH_ANNOUNCEMENT, ...current, ...req.body };
+  const updated = req.body;
   await dbSave("launchAnnouncement", updated);
   res.json(updated);
 });
