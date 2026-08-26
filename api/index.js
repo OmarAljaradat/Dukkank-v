@@ -46911,15 +46911,20 @@ var memOrders = [
     updated_at: new Date(Date.now() - 1e3 * 60 * 12).toISOString()
   }
 ];
+var memStoreConfig = new Map();
 async function dbLoad(key, defaultVal) {
   try {
     const { rows } = await pool5.query("SELECT value FROM store_config WHERE key = $1", [key]);
-    return rows.length > 0 ? rows[0].value : defaultVal;
+    if (rows.length > 0) {
+      memStoreConfig.set(key, rows[0].value);
+      return rows[0].value;
+    }
   } catch {
-    return defaultVal;
   }
+  return memStoreConfig.has(key) ? memStoreConfig.get(key) : defaultVal;
 }
 async function dbSave(key, value) {
+  memStoreConfig.set(key, value);
   try {
     await pool5.query(
       `INSERT INTO store_config (key, value, updated_at)

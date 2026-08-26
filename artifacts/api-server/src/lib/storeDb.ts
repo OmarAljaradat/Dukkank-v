@@ -35,18 +35,24 @@ export let memOrders: any[] = [
   }
 ];
 
-// ── DB persistence helpers ────────────────────────────────────────────────────
+// ── DB persistence helpers with fallback memory cache ────────────────────────
+const memStoreConfig = new Map<string, any>();
 
 export async function dbLoad(key: string, defaultVal: any): Promise<any> {
   try {
     const { rows } = await pool.query("SELECT value FROM store_config WHERE key = $1", [key]);
-    return rows.length > 0 ? rows[0].value : defaultVal;
-  } catch { return defaultVal; }
+    if (rows.length > 0) {
+      memStoreConfig.set(key, rows[0].value);
+      return rows[0].value;
+    }
+  } catch {}
+  return memStoreConfig.has(key) ? memStoreConfig.get(key) : defaultVal;
 }
 
 export const dbGet = dbLoad;
 
 export async function dbSave(key: string, value: any): Promise<void> {
+  memStoreConfig.set(key, value);
   try {
     await pool.query(
       `INSERT INTO store_config (key, value, updated_at)

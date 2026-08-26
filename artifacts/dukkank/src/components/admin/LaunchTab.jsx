@@ -71,13 +71,12 @@ export default function LaunchTab({ onChanged }) {
         toast.success(`تم استيراد كافة بيانات وتفاصيل (${game.name}) بنجاح 🎮!`);
     };
 
-    // 🎮 GTA VI VICE CITY - Quick Theme Preset
+    // 🎮 GTA VI VICE CITY - Clean Explicit Theme Preset
     const handleGTAVIPreset = async () => {
         const launchDate = new Date("2025-10-28");
         const launchIso = launchDate.toISOString().split("T")[0];
 
         const newData = {
-            ...form,
             enabled: true,
             theme: "vice",
             gameName: "Grand Theft Auto VI",
@@ -114,14 +113,13 @@ export default function LaunchTab({ onChanged }) {
         }
     };
 
-    // ⚽ EA SPORTS FC - Quick Theme Preset
+    // ⚽ EA SPORTS FC - Clean Explicit Theme Preset
     const handleEAFCPreset = async () => {
         const launchDate = new Date();
         launchDate.setDate(launchDate.getDate() + 14);
         const launchIso = launchDate.toISOString().split("T")[0];
 
         const newData = {
-            ...form,
             enabled: true,
             theme: "eafc",
             gameName: "EA SPORTS FC 27",
@@ -174,6 +172,7 @@ export default function LaunchTab({ onChanged }) {
         try {
             setLaunchAnnouncement(form);
             await apiUpdateLaunchAnnouncement(form);
+            await ensureSectionVisible();
             toast.success("تم نشر وحفظ إعلان الإطلاق بنجاح في الموقع 📢");
             onChanged?.();
         } catch (err) {
