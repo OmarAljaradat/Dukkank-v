@@ -129,7 +129,7 @@ export default function AdminDashboard() {
                         <img src="/logo.png" alt="logo" className="w-8 h-8 rounded-xl ring-2 ring-white/20" />
                         <div className="hidden sm:block">
                             <div className="text-sm font-bold leading-none">{t("admin.dashboard")}</div>
-                            <div className="text-[10px] opacity-60 mt-0.5">{user.email}</div>
+                            <div className="text-[10px] opacity-60 mt-0.5">{user?.email || "admin@dukkank.com"}</div>
                         </div>
                     </div>
 
@@ -189,39 +189,39 @@ export default function AdminDashboard() {
                         ))}
                     </TabsList>
 
-                    {/* Tab contents */}
-                    <TabsContent value="analytics"    className="mt-0"><AnalyticsTab /></TabsContent>
-                    <TabsContent value="orders"          className="mt-0"><OrdersDashboardTab /></TabsContent>
-                    <TabsContent value="completedOrders" className="mt-0"><CompletedOrdersTab /></TabsContent>
-                    <TabsContent value="insights"     className="mt-0"><InsightsTab /></TabsContent>
-                    <TabsContent value="weeklyReport" className="mt-0"><WeeklyReportTab /></TabsContent>
-                    <TabsContent value="finance"      className="mt-0"><FinanceTab /></TabsContent>
-                    <TabsContent value="store"        className="mt-0"><StoreSettingsTab onSaved={reload} /></TabsContent>
-                    <TabsContent value="games"        className="mt-0"><GamesTab onChanged={reload} /></TabsContent>
-                    <TabsContent value="subscriptions"className="mt-0"><SubscriptionsTab onChanged={reload} /></TabsContent>
-                    <TabsContent value="suppliers"    className="mt-0"><SuppliersTab /></TabsContent>
-                    <TabsContent value="gifts"        className="mt-0"><GiftsTab /></TabsContent>
-                    <TabsContent value="bundles"      className="mt-0"><BundlesTab onChanged={reload} /></TabsContent>
-                    <TabsContent value="coupons"      className="mt-0"><CouponsTab onChanged={reload} /></TabsContent>
-                    <TabsContent value="launch"       className="mt-0"><LaunchTab onChanged={reload} /></TabsContent>
-                    <TabsContent value="productsCSV"  className="mt-0"><ProductsCSVTab /></TabsContent>
-                    <TabsContent value="storeInfo"    className="mt-0"><StoreInfoTab onChanged={reload} /></TabsContent>
-                    <TabsContent value="content"      className="mt-0"><ContentTab onChanged={reload} /></TabsContent>
-                    <TabsContent value="theme"        className="mt-0"><ThemeTab onChanged={reload} /></TabsContent>
-                    <TabsContent value="seo"          className="mt-0"><SeoTab onChanged={reload} /></TabsContent>
-                    <TabsContent value="sections"     className="mt-0"><SectionsTab onChanged={reload} /></TabsContent>
-                    <TabsContent value="crm"          className="mt-0"><CustomerCrmTab /></TabsContent>
-                    <TabsContent value="affiliate"    className="mt-0"><AffiliateTab /></TabsContent>
-                    <TabsContent value="reviews"      className="mt-0"><ReviewsTab onChanged={reload} /></TabsContent>
-                    <TabsContent value="faqs"         className="mt-0"><FaqTab onChanged={reload} /></TabsContent>
-                    <TabsContent value="marketing"    className="mt-0"><MarketingTab onChanged={reload} /></TabsContent>
-                    <TabsContent value="notify"       className="mt-0"><NotifyTab /></TabsContent>
-                    <TabsContent value="security"     className="mt-0"><SecurityTab /></TabsContent>
-                    <TabsContent value="siteSettings" className="mt-0"><SiteSettingsTab onChanged={reload} /></TabsContent>
-                    <TabsContent value="audit"        className="mt-0"><AuditTab /></TabsContent>
-                    <TabsContent value="account"      className="mt-0"><AccountTab /></TabsContent>
-                    <TabsContent value="backup"       className="mt-0"><BackupTab /></TabsContent>
-                    <TabsContent value="performance"  className="mt-0"><PerformanceTab /></TabsContent>
+                    {/* Tab contents (Lazy rendered per active tab) */}
+                    <TabsContent value="analytics"    className="mt-0">{tab === "analytics" && <AnalyticsTab />}</TabsContent>
+                    <TabsContent value="orders"          className="mt-0">{tab === "orders" && <OrdersDashboardTab />}</TabsContent>
+                    <TabsContent value="completedOrders" className="mt-0">{tab === "completedOrders" && <CompletedOrdersTab />}</TabsContent>
+                    <TabsContent value="insights"     className="mt-0">{tab === "insights" && <InsightsTab />}</TabsContent>
+                    <TabsContent value="weeklyReport" className="mt-0">{tab === "weeklyReport" && <WeeklyReportTab />}</TabsContent>
+                    <TabsContent value="finance"      className="mt-0">{tab === "finance" && <FinanceTab />}</TabsContent>
+                    <TabsContent value="store"        className="mt-0">{tab === "store" && <StoreSettingsTab onSaved={reload} />}</TabsContent>
+                    <TabsContent value="games"        className="mt-0">{tab === "games" && <GamesTab onChanged={reload} />}</TabsContent>
+                    <TabsContent value="subscriptions"className="mt-0">{tab === "subscriptions" && <SubscriptionsTab onChanged={reload} />}</TabsContent>
+                    <TabsContent value="suppliers"    className="mt-0">{tab === "suppliers" && <SuppliersTab />}</TabsContent>
+                    <TabsContent value="gifts"        className="mt-0">{tab === "gifts" && <GiftsTab />}</TabsContent>
+                    <TabsContent value="bundles"      className="mt-0">{tab === "bundles" && <BundlesTab onChanged={reload} />}</TabsContent>
+                    <TabsContent value="coupons"      className="mt-0">{tab === "coupons" && <CouponsTab onChanged={reload} />}</TabsContent>
+                    <TabsContent value="launch"       className="mt-0">{tab === "launch" && <LaunchTab onChanged={reload} />}</TabsContent>
+                    <TabsContent value="productsCSV"  className="mt-0">{tab === "productsCSV" && <ProductsCSVTab />}</TabsContent>
+                    <TabsContent value="storeInfo"    className="mt-0">{tab === "storeInfo" && <StoreInfoTab onChanged={reload} />}</TabsContent>
+                    <TabsContent value="content"      className="mt-0">{tab === "content" && <ContentTab onChanged={reload} />}</TabsContent>
+                    <TabsContent value="theme"        className="mt-0">{tab === "theme" && <ThemeTab onChanged={reload} />}</TabsContent>
+                    <TabsContent value="seo"          className="mt-0">{tab === "seo" && <SeoTab onChanged={reload} />}</TabsContent>
+                    <TabsContent value="sections"     className="mt-0">{tab === "sections" && <SectionsTab onChanged={reload} />}</TabsContent>
+                    <TabsContent value="crm"          className="mt-0">{tab === "crm" && <CustomerCrmTab />}</TabsContent>
+                    <TabsContent value="affiliate"    className="mt-0">{tab === "affiliate" && <AffiliateTab />}</TabsContent>
+                    <TabsContent value="reviews"      className="mt-0">{tab === "reviews" && <ReviewsTab onChanged={reload} />}</TabsContent>
+                    <TabsContent value="faqs"         className="mt-0">{tab === "faqs" && <FaqTab onChanged={reload} />}</TabsContent>
+                    <TabsContent value="marketing"    className="mt-0">{tab === "marketing" && <MarketingTab onChanged={reload} />}</TabsContent>
+                    <TabsContent value="notify"       className="mt-0">{tab === "notify" && <NotifyTab />}</TabsContent>
+                    <TabsContent value="security"     className="mt-0">{tab === "security" && <SecurityTab />}</TabsContent>
+                    <TabsContent value="siteSettings" className="mt-0">{tab === "siteSettings" && <SiteSettingsTab onChanged={reload} />}</TabsContent>
+                    <TabsContent value="audit"        className="mt-0">{tab === "audit" && <AuditTab />}</TabsContent>
+                    <TabsContent value="account"      className="mt-0">{tab === "account" && <AccountTab />}</TabsContent>
+                    <TabsContent value="backup"       className="mt-0">{tab === "backup" && <BackupTab />}</TabsContent>
+                    <TabsContent value="performance"  className="mt-0">{tab === "performance" && <PerformanceTab />}</TabsContent>
                 </Tabs>
             </main>
         </div>

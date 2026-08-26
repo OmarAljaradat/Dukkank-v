@@ -27,12 +27,23 @@ export class ErrorBoundary extends React.Component {
             <p className="text-sm text-[hsl(var(--brand-ink))]/70 dir-rtl">
               حدث خطأ مؤقت في تحميل هذا الجزء. يمكنك إعادة المحاولة أو العودة للصفحة الرئيسية.
             </p>
+            {this.state.error?.message && (
+              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-xs font-mono text-red-600 text-left overflow-auto max-h-32">
+                {this.state.error.message}
+              </div>
+            )}
             <div className="flex items-center justify-center gap-3 pt-2">
               <button
                 onClick={() => this.setState({ hasError: false, error: null })}
-                className="px-5 py-2.5 rounded-full bg-[hsl(var(--brand-blue-deep))] text-white font-bold text-sm flex items-center gap-2 hover:opacity-90 transition-all shadow-md"
+                className="px-5 py-2.5 rounded-full bg-[hsl(var(--brand-blue-deep))] text-white font-bold text-sm flex items-center gap-2 hover:opacity-90 transition-all shadow-md cursor-pointer"
               >
                 <RefreshCw className="w-4 h-4" /> إعادة المحاولة
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-5 py-2.5 rounded-full bg-slate-800 text-white font-bold text-sm flex items-center gap-2 hover:opacity-90 transition-all shadow-md cursor-pointer"
+              >
+                تحديث الصفحة 🔄
               </button>
               <a
                 href="/"
