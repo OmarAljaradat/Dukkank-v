@@ -421,8 +421,6 @@ router.delete("/admin/suppliers/:id", async (req, res) => {
   await dbSave("suppliers", next);
   res.json({ ok: true });
 });
-  res.json({ ok: true });
-});
 
 // ══════════════════════════════════════════════════════════════════════════════
 // ── Customer Profile ─────────────────────────────────────────────────────────
