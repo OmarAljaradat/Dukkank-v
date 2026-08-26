@@ -11,9 +11,22 @@ import {
 } from "../../lib/api";
 import { Input, Field, Textarea } from "./_widgets";
 
+const LOCAL_SUPPLIERS_KEY = "dukkank_suppliers_list";
+
+const getSavedSuppliers = () => {
+  try {
+    const val = localStorage.getItem(LOCAL_SUPPLIERS_KEY);
+    return val ? JSON.parse(val) : null;
+  } catch { return null; }
+};
+
+const saveLocalSuppliers = (list) => {
+  try { localStorage.setItem(LOCAL_SUPPLIERS_KEY, JSON.stringify(list)); } catch {}
+};
+
 export default function SuppliersTab() {
-  const [suppliers, setSuppliers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [suppliers, setSuppliers] = useState(() => getSavedSuppliers() || []);
+  const [loading, setLoading] = useState(() => !getSavedSuppliers());
   const [editingId, setEditingId] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -24,9 +37,23 @@ export default function SuppliersTab() {
   const fetchSuppliers = useCallback(async () => {
     try {
       const data = await apiListSuppliers();
-      setSuppliers(Array.isArray(data) ? data : []);
+      const serverList = Array.isArray(data) ? data : [];
+      const localList = getSavedSuppliers() || [];
+      
+      // Merge unique by ID or name
+      const mergedMap = new Map();
+      localList.forEach(s => mergedMap.set(String(s.id || s.name), s));
+      serverList.forEach(s => mergedMap.set(String(s.id || s.name), s));
+      const merged = Array.from(mergedMap.values());
+      
+      const finalList = merged.length > 0 ? merged : serverList;
+      setSuppliers(finalList);
+      saveLocalSuppliers(finalList);
     } catch (e) {
-      toast.error("تعذّر تحميل الموردين: " + formatApiError(e));
+      const localList = getSavedSuppliers();
+      if (!localList || localList.length === 0) {
+        toast.error("تعذّر تحميل الموردين: " + formatApiError(e));
+      }
     } finally { setLoading(false); }
   }, []);
 
@@ -47,12 +74,25 @@ export default function SuppliersTab() {
     setSaving(true);
     try {
       if (editingId) {
-        const updated = await apiUpdateSupplier(editingId, form);
-        setSuppliers((prev) => prev.map((s) => (s.id === editingId ? { ...s, ...form } : s)));
+        const nextList = suppliers.map((s) => (s.id === editingId ? { ...s, ...form } : s));
+        setSuppliers(nextList);
+        saveLocalSuppliers(nextList);
+        await apiUpdateSupplier(editingId, form);
         toast.success("تم تحديث بيانات المورد بنجاح ✅");
       } else {
-        const created = await apiCreateSupplier(form);
-        setSuppliers((prev) => [created, ...prev]);
+        const tempId = Date.now();
+        const newSupplier = {
+          id: tempId,
+          name: form.name.trim(),
+          phone: form.phone.trim(),
+          notes: form.notes.trim() || undefined,
+          is_active: true,
+          created_at: new Date().toISOString()
+        };
+        const nextList = [newSupplier, ...suppliers];
+        setSuppliers(nextList);
+        saveLocalSuppliers(nextList);
+        await apiCreateSupplier(form);
         toast.success("تمت إضافة المورد الجديد بنجاح ✅");
       }
       resetForm();
@@ -73,7 +113,9 @@ export default function SuppliersTab() {
 
   const handleToggleActive = async (s) => {
     const nextState = !s.is_active;
-    setSuppliers((prev) => prev.map((x) => (x.id === s.id ? { ...x, is_active: nextState } : x)));
+    const nextList = suppliers.map((x) => (x.id === s.id ? { ...x, is_active: nextState } : x));
+    setSuppliers(nextList);
+    saveLocalSuppliers(nextList);
     try {
       await apiUpdateSupplier(s.id, { is_active: nextState });
       toast.success(nextState ? `تم تفعيل المورد (${s.name}) 🟢` : `تم تعطيل المورد (${s.name}) ⚪`);
@@ -85,7 +127,9 @@ export default function SuppliersTab() {
 
   const handleDelete = async (s) => {
     if (!confirm(`هل أنت متأكد من حذف المورد "${s.name}"؟`)) return;
-    setSuppliers((prev) => prev.filter((x) => x.id !== s.id));
+    const nextList = suppliers.filter((x) => x.id !== s.id);
+    setSuppliers(nextList);
+    saveLocalSuppliers(nextList);
     try {
       await apiDeleteSupplier(s.id);
       toast.success(`تم حذف المورد "${s.name}" 🗑️`);
