@@ -15,28 +15,20 @@ function calcTimeLeft(targetTime) {
 
 export function FlashSaleBanner() {
   const { promo } = useStoreData();
-  const flash = promo?.flashSale || {
-    enabled: true,
-    title: "⚡ عروض الفلاش السريعة — تنتهي قريباً!",
-    subtitle: "احصل على خصم 20% على جميع ألعاب البلايستيشن واشتراكات بلس",
-    code: "FLASH20",
-    discount: 20,
-    endTime: new Date(Date.now() + 86400000 * 2).toISOString(),
-    badge: "ساعات محددة ⏳"
-  };
+  const flash = promo?.flashSale;
 
-  const [timeLeft, setTimeLeft] = useState(() => calcTimeLeft(flash.endTime));
+  const [timeLeft, setTimeLeft] = useState(() => calcTimeLeft(flash?.endTime));
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (!flash.enabled) return;
+    if (!flash?.enabled) return;
     const interval = setInterval(() => {
-      setTimeLeft(calcTimeLeft(flash.endTime));
+      setTimeLeft(calcTimeLeft(flash?.endTime));
     }, 1000);
     return () => clearInterval(interval);
-  }, [flash.enabled, flash.endTime]);
+  }, [flash?.enabled, flash?.endTime]);
 
-  if (flash?.enabled === false) return null;
+  if (!flash || flash.enabled !== true) return null;
 
   const handleCopyCode = () => {
     if (!flash.code) return;

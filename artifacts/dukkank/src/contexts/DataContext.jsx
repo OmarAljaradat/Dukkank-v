@@ -290,6 +290,19 @@ export function DataProvider({ children }) {
         return out;
     };
 
+    const mergePromo = (fetched) => {
+        if (!fetched || typeof fetched !== "object" || Array.isArray(fetched)) return promo;
+        return {
+            ...FALLBACK_PROMO,
+            ...fetched,
+            headerBanner: { ...FALLBACK_PROMO.headerBanner, ...(fetched.headerBanner || {}) },
+            flashSale: { ...FALLBACK_PROMO.flashSale, ...(fetched.flashSale || {}) },
+            popupModal: { ...FALLBACK_PROMO.popupModal, ...(fetched.popupModal || {}) },
+            rewardBox: { ...FALLBACK_PROMO.rewardBox, ...(fetched.rewardBox || {}) },
+            applePayNotice: { ...FALLBACK_PROMO.applePayNotice, ...(fetched.applePayNotice || {}) },
+        };
+    };
+
     const asArray = (v, fallback) => (Array.isArray(v) && v.length > 0 ? v : fallback);
     const asObject = (v, fallback) => v && typeof v === "object" && !Array.isArray(v) ? v : fallback;
 
@@ -316,7 +329,7 @@ export function DataProvider({ children }) {
             if (gms?.data) setGames(asArray(gms.data, games));
             if (bnds?.data) setBundles(asArray(bnds.data, bundles));
             if (secs?.data) setSections(asArray(secs.data, sections));
-            if (prom?.data) setPromo(asObject(prom.data, promo));
+            if (prom?.data) setPromo(mergePromo(prom.data));
             if (sp?.data) setSocialProof(asObject(sp.data, socialProof));
             if (wat?.data) setWATemplates(asObject(wat.data, waTemplates));
             if (rvs?.data) {

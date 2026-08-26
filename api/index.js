@@ -47015,14 +47015,44 @@ var DEFAULT_SECTIONS = [
   { id: "faq", name: "\u0627\u0644\u0623\u0633\u0626\u0644\u0629 \u0627\u0644\u0634\u0627\u0626\u0639\u0629", visible: true }
 ];
 var DEFAULT_PROMO = {
+  enabled: true,
   activeBanner: "default",
   customText: "\u26A1 \u0639\u0631\u0636 \u062E\u0627\u0635: \u062E\u0635\u0645 10% \u0639\u0646\u062F \u0627\u0644\u0634\u0631\u0627\u0621 \u0627\u0644\u064A\u0648\u0645 \u0643\u0648\u062F \u0627\u0644\u062E\u0635\u0645: DUKKANK10",
-  activeOfferModal: "gtavi",
-  offerModalTitle: "\u{1F525} \u0627\u062D\u062C\u0632 Grand Theft Auto VI \u0645\u0633\u0628\u0642\u0627\u064B \u0627\u0644\u0622\u0646!",
-  offerModalSubtitle: "\u0627\u062D\u0635\u0644 \u0639\u0644\u0649 \u0628\u0648\u0646\u0648\u0633 \u0627\u0644\u0637\u0644\u0628 \u0627\u0644\u0645\u0633\u0628\u0642 \u0648\u062D\u0633\u0627\u0628 \u0623\u0635\u0644\u064A \u0645\u0636\u0645\u0648\u0646 100%",
-  offerModalGameId: "gtavi",
-  countdownEnabled: true,
-  countdownDate: "2026-11-15T00:00:00.000Z"
+  headerBanner: {
+    enabled: true,
+    title: "🔥 خصم 15% بمناسبة عطلة نهاية الأسبوع!",
+    code: "DUKKANK15",
+    badge: "عرض خاص",
+    buttonText: "تسوّق الآن",
+    bgColor: "amber"
+  },
+  flashSale: {
+    enabled: false,
+    title: "⚡ عروض الفلاش السريعة — تنتهي قريباً!",
+    subtitle: "احصل على خصم 20% على جميع ألعاب البلايستيشن واشتراكات بلس",
+    code: "FLASH20",
+    discount: 20,
+    endTime: new Date(Date.now() + 86400000 * 2).toISOString(),
+    badge: "ساعات محددة ⏳"
+  },
+  popupModal: {
+    enabled: false,
+    title: "🎁 هدية خاصة لزيارتك الأولى!",
+    description: "احصل على خصم 10% فوري على طلبتك الأولى بمتجر دُكانك 🎮",
+    code: "WELCOME10",
+    discount: 10,
+    buttonText: "تفعيل الخصم 🚀",
+    delaySeconds: 3
+  },
+  applePayNotice: {
+    enabled: true,
+    title: "تنبيه الدفع السريع عبر Apple Pay ",
+    subtitle: "للدفع المباشر السلس عبر Apple Pay، يرجى فتح المتجر في متصفح Safari.",
+    buttonText: "📋 نسخ رابط المتجر لـ Safari"
+  },
+  socialProof: {
+    enabled: true
+  }
 };
 var DEFAULT_SOCIAL_PROOF = {
   enabled: true,

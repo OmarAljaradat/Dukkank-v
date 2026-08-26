@@ -96,6 +96,23 @@ export default function MarketingTab({ onChanged }) {
   const { promo, setPromo } = useStoreData();
   const [activeTab, setActiveTab] = useState("email"); // 'email' | 'whatsapp' | 'promo' | 'settings'
 
+  const toggleCampaign = async (key, name) => {
+    const currentVal = promo?.[key]?.enabled;
+    const nextVal = currentVal === false ? true : (currentVal === true ? false : false);
+    const newPromo = {
+      ...promo,
+      [key]: { ...(promo?.[key] || {}), enabled: nextVal }
+    };
+    setPromo(newPromo);
+    try {
+      await apiUpdatePromo(newPromo);
+      toast.success(nextVal ? `تم تفعيل ${name} بالمتجر بنجاح 🟢` : `تم تعطيل ${name} من المتجر بنجاح 🔴`);
+      onChanged?.();
+    } catch {
+      toast.info(nextVal ? `تم تفعيل ${name} محلياً` : `تم تعطيل ${name} محلياً`);
+    }
+  };
+
   // Presets State (Editable & Custom Creatable)
   const [emailPresets, setEmailPresets] = useState(() => lsGet("dukkank_custom_email_templates", DEFAULT_EMAIL_PRESETS));
   const [waPresets, setWaPresets] = useState(() => lsGet("dukkank_custom_wa_templates", DEFAULT_WA_PRESETS));
@@ -1009,13 +1026,7 @@ export default function MarketingTab({ onChanged }) {
 
                   <button
                     type="button"
-                    onClick={() => {
-                      const enabled = !promo?.headerBanner?.enabled;
-                      setPromo(p => ({
-                        ...p,
-                        headerBanner: { ...(p?.headerBanner || {}), enabled }
-                      }));
-                    }}
+                    onClick={() => toggleCampaign("headerBanner", "شريط التخفيضات العلوي")}
                     className={`px-3.5 py-1.5 rounded-full text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
                       promo?.headerBanner?.enabled
                         ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
@@ -1096,13 +1107,7 @@ export default function MarketingTab({ onChanged }) {
 
                   <button
                     type="button"
-                    onClick={() => {
-                      const enabled = !promo?.flashSale?.enabled;
-                      setPromo(p => ({
-                        ...p,
-                        flashSale: { ...(p?.flashSale || {}), enabled }
-                      }));
-                    }}
+                    onClick={() => toggleCampaign("flashSale", "بنر عروض الفلاش")}
                     className={`px-3.5 py-1.5 rounded-full text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
                       promo?.flashSale?.enabled
                         ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
@@ -1165,7 +1170,7 @@ export default function MarketingTab({ onChanged }) {
 
               {/* Preview */}
               <div className="mt-4 p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-center text-xs font-bold text-rose-700 dark:text-rose-300">
-                بنر الفلاش مفعّل مع عداد تنازلي حاد بالصفحة الرئيسية ⚡
+                {promo?.flashSale?.enabled ? "بنر الفلاش مفعّل مع عداد تنازلي حاد بالصفحة الرئيسية ⚡" : "بنر الفلاش معطل حالياً ولا يظهر للزوار ⚪"}
               </div>
             </div>
 
@@ -1185,13 +1190,7 @@ export default function MarketingTab({ onChanged }) {
 
                   <button
                     type="button"
-                    onClick={() => {
-                      const enabled = !promo?.popupModal?.enabled;
-                      setPromo(p => ({
-                        ...p,
-                        popupModal: { ...(p?.popupModal || {}), enabled }
-                      }));
-                    }}
+                    onClick={() => toggleCampaign("popupModal", "النافذة المنبثقة التفاعلية")}
                     className={`px-3.5 py-1.5 rounded-full text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
                       promo?.popupModal?.enabled
                         ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
@@ -1253,7 +1252,7 @@ export default function MarketingTab({ onChanged }) {
 
               {/* Preview */}
               <div className="mt-4 p-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-center text-xs font-bold text-purple-700 dark:text-purple-300">
-                تظهر النافذة للزائر بعد {promo?.popupModal?.delaySeconds || 3} ثوانٍ كهدية ترحيبية 🎁
+                {promo?.popupModal?.enabled ? `تظهر النافذة للزائر بعد ${promo?.popupModal?.delaySeconds || 3} ثوانٍ كهدية ترحيبية 🎁` : "النافذة المنبثقة معطلة حالياً ⚪"}
               </div>
             </div>
 
@@ -1273,13 +1272,7 @@ export default function MarketingTab({ onChanged }) {
 
                   <button
                     type="button"
-                    onClick={() => {
-                      const enabled = !promo?.socialProof?.enabled;
-                      setPromo(p => ({
-                        ...p,
-                        socialProof: { ...(p?.socialProof || {}), enabled }
-                      }));
-                    }}
+                    onClick={() => toggleCampaign("socialProof", "إشعارات المبيعات المباشرة")}
                     className={`px-3.5 py-1.5 rounded-full text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
                       promo?.socialProof?.enabled !== false
                         ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
@@ -1300,7 +1293,7 @@ export default function MarketingTab({ onChanged }) {
 
               {/* Preview */}
               <div className="mt-4 p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-center text-xs font-bold text-blue-700 dark:text-blue-300">
-                إشعارات المبيعات الحية مفعّلة بالزاوية السفلية 🚀
+                {promo?.socialProof?.enabled !== false ? "إشعارات المبيعات الحية مفعّلة بالزاوية السفلية 🚀" : "إشعارات المبيعات معطلة حالياً ⚪"}
               </div>
             </div>
 
@@ -1320,13 +1313,7 @@ export default function MarketingTab({ onChanged }) {
 
                   <button
                     type="button"
-                    onClick={() => {
-                      const enabled = !promo?.applePayNotice?.enabled;
-                      setPromo(p => ({
-                        ...p,
-                        applePayNotice: { ...(p?.applePayNotice || {}), enabled }
-                      }));
-                    }}
+                    onClick={() => toggleCampaign("applePayNotice", "بنر تنبيه Apple Pay")}
                     className={`px-3.5 py-1.5 rounded-full text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
                       promo?.applePayNotice?.enabled !== false
                         ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
