@@ -18,7 +18,7 @@ export const ComparisonTable = () => {
     // Check visibility of each subscription tier
     const isEssVisible = (subscriptions || []).find((s) => s.id === "essential")?.visible !== false;
     const isExtVisible = (subscriptions || []).find((s) => s.id === "extra")?.visible !== false;
-    const isDelVisible = (subscriptions || []).find((s) => s.id === "deluxe")?.visible === true;
+    const isDelVisible = (subscriptions || []).find((s) => s.id === "deluxe")?.visible !== false;
 
     const activeColsCount = (isEssVisible ? 1 : 0) + (isExtVisible ? 1 : 0) + (isDelVisible ? 1 : 0);
 

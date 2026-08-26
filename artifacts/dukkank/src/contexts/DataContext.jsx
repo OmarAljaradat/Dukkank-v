@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { getToken } from "../lib/api";
+import { applyTheme } from "../lib/storage";
 import {
     STORE as FALLBACK_STORE,
     SUBSCRIPTIONS as FALLBACK_SUBS,
@@ -260,6 +261,7 @@ export function DataProvider({ children }) {
     const [content, setContentState] = useState(() => loadLocal("dukkank_live_content", FALLBACK_CONTENT));
     const [siteSettings, setSiteSettingsState] = useState(() => loadLocal("dukkank_live_site_settings", FALLBACK_SITE_SETTINGS));
     const [launchAnnouncement, setLaunchAnnouncementState] = useState(() => loadLocal("dukkank_live_launch", FALLBACK_LAUNCH_ANNOUNCEMENT));
+    const [theme, setThemeState] = useState(() => loadLocal("dukkank_live_theme", {}));
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -277,6 +279,11 @@ export function DataProvider({ children }) {
     const setContent = (val) => { setContentState(val); saveLocal("dukkank_live_content", val); };
     const setSiteSettings = (val) => { setSiteSettingsState(val); saveLocal("dukkank_live_site_settings", val); };
     const setLaunchAnnouncement = (val) => { setLaunchAnnouncementState(val); saveLocal("dukkank_live_launch", val); };
+    const setTheme = (val) => {
+        setThemeState(val);
+        saveLocal("dukkank_live_theme", val);
+        if (val && typeof val === "object") applyTheme(val);
+    };
 
     const mergeContent = (fetched) => {
         if (!fetched || typeof fetched !== "object" || Array.isArray(fetched)) return content;
@@ -331,6 +338,7 @@ export function DataProvider({ children }) {
                 axios.get(`${API}/content`),
                 axios.get(`${API}/site-settings`),
                 axios.get(`${API}/launch-announcement`),
+                axios.get(`${API}/theme`),
             ]);
 
             const getVal = (idx) => (results[idx]?.status === "fulfilled" ? results[idx].value?.data : null);
@@ -348,6 +356,7 @@ export function DataProvider({ children }) {
             const cnt = getVal(10);
             const ss = getVal(11);
             const la = getVal(12);
+            const thm = getVal(13);
 
             if (s) setStore(asObject(s, store));
             if (subs) setSubscriptions(asArray(subs, subscriptions));
@@ -377,6 +386,7 @@ export function DataProvider({ children }) {
             if (cnt) setContent(mergeContent(cnt));
             if (ss) setSiteSettings(asObject(ss, siteSettings));
             if (la) setLaunchAnnouncement(mergeLaunchAnnouncement(la));
+            if (thm && typeof thm === "object" && Object.keys(thm).length > 0) setTheme(thm);
 
             const token = getToken();
             if (token) {
@@ -430,6 +440,8 @@ export function DataProvider({ children }) {
                 setSiteSettings,
                 launchAnnouncement,
                 setLaunchAnnouncement,
+                theme,
+                setTheme,
                 loading,
                 error,
                 reload: fetchAll,

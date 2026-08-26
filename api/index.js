@@ -48138,9 +48138,19 @@ router13.get("/site-settings", async (_req, res) => {
 router13.put("/admin/site-settings", async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const current = await dbLoad("siteSettings", DEFAULT_SITE_SETTINGS);
-  const updated = { ...current, ...req.body };
+  const updated = { ...DEFAULT_SITE_SETTINGS, ...current, ...req.body };
   await dbSave("siteSettings", updated);
   res.json(updated);
+});
+router13.get("/theme", async (_req, res) => {
+  const data = await dbLoad("theme", {});
+  res.json(data);
+});
+router13.put("/admin/theme", async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const theme = req.body || {};
+  await dbSave("theme", theme);
+  res.json(theme);
 });
 var promo_default = router13;
 

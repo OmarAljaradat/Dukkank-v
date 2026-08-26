@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { getTheme, setTheme, applyTheme } from "../../lib/storage";
-import { apiGetTheme, apiUpdateTheme } from "../../lib/api";
+import { getTheme, setTheme as setLocalTheme, applyTheme } from "../../lib/storage";
+import { apiGetTheme, apiUpdateTheme, formatApiError } from "../../lib/api";
+import { useStoreData } from "../../contexts/DataContext";
 import { toast } from "sonner";
-import { Palette, RotateCcw, Save, Sparkles, Check, Gamepad2, ShoppingCart, ShieldCheck } from "lucide-react";
+import { Palette, RotateCcw, Save, Sparkles, Check, Gamepad2, ShoppingCart, ShieldCheck, Loader2 } from "lucide-react";
 
 const VARS = [
     { key: "brand-cream", label: "خلفية الموقع الرئيسية (Cream/Bg)", default: "38 47% 92%" },
@@ -116,44 +117,75 @@ function hexToHsl(hex) {
 }
 
 export default function ThemeTab({ onChanged }) {
+    const { theme: storeTheme, setTheme: setStoreTheme } = useStoreData();
     const [values, setValues] = useState({});
+    const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        const saved = getTheme();
+        const saved = (storeTheme && Object.keys(storeTheme).length > 0) ? storeTheme : getTheme();
         const init = {};
         VARS.forEach((v) => { init[v.key] = saved[v.key] || v.default; });
         setValues(init);
-    }, []);
+
+        apiGetTheme()
+            .then((serverTheme) => {
+                if (serverTheme && typeof serverTheme === "object" && Object.keys(serverTheme).length > 0) {
+                    const next = {};
+                    VARS.forEach((v) => { next[v.key] = serverTheme[v.key] || v.default; });
+                    setValues(next);
+                    setLocalTheme(serverTheme);
+                    applyTheme(serverTheme);
+                    if (setStoreTheme) setStoreTheme(serverTheme);
+                }
+            })
+            .catch(() => {});
+    }, [storeTheme]);
 
     const save = async () => {
-        setTheme(values);
+        setSaving(true);
+        setLocalTheme(values);
         applyTheme(values);
+        if (setStoreTheme) setStoreTheme(values);
         window.dispatchEvent(new CustomEvent("dukkank-theme-change", { detail: values }));
-        try { await apiUpdateTheme(values); } catch (_) {}
-        toast.success("تم حفظ ثيم الألوان وتطبيقه على كافة أجزاء المتجر 🎨✅");
-        onChanged?.();
+        try {
+            await apiUpdateTheme(values);
+            toast.success("تم حفظ ثيم الألوان وتطبيقه على كافة أجزاء المتجر والسيرفر 🎨✅");
+            onChanged?.();
+        } catch (e) {
+            toast.error("فشل حفظ الثيم على السيرفر: " + formatApiError(e));
+        } finally {
+            setSaving(false);
+        }
     };
 
     const reset = async () => {
         const def = {};
         VARS.forEach((v) => { def[v.key] = v.default; });
         setValues(def);
-        setTheme({});
+        setLocalTheme({});
         applyTheme({});
+        if (setStoreTheme) setStoreTheme({});
         window.dispatchEvent(new CustomEvent("dukkank-theme-change", { detail: {} }));
-        try { await apiUpdateTheme({}); } catch (_) {}
-        toast.success("تم إعادة الألوان للثيم الأصلي المعتمد");
-        onChanged?.();
+        try {
+            await apiUpdateTheme({});
+            toast.success("تم إعادة الألوان للثيم الأصلي المعتمد");
+            onChanged?.();
+        } catch (_) {}
     };
 
     const applyPreset = async (preset) => {
         setValues(preset.colors);
-        setTheme(preset.colors);
+        setLocalTheme(preset.colors);
         applyTheme(preset.colors);
+        if (setStoreTheme) setStoreTheme(preset.colors);
         window.dispatchEvent(new CustomEvent("dukkank-theme-change", { detail: preset.colors }));
-        try { await apiUpdateTheme(preset.colors); } catch (_) {}
-        toast.success(`تم تطبيق ثيم "${preset.name}" بنجاح ✨`);
-        onChanged?.();
+        try {
+            await apiUpdateTheme(preset.colors);
+            toast.success(`تم تطبيق ثيم "${preset.name}" وحفظه سحابياً ✨`);
+            onChanged?.();
+        } catch (e) {
+            toast.error(formatApiError(e));
+        }
     };
 
     return (

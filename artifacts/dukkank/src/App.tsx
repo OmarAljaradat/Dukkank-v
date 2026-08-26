@@ -249,12 +249,13 @@ function HomePage() {
     const isHeroVisible = heroSec ? heroSec.visible !== false : true;
     let visibleSections = rawSections.filter((s: any) => s.visible !== false && s.id !== "hero" && !REMOVED_IDS.includes(s.id));
 
-    // Ensure Deluxe section is always positioned immediately after Extra!
+    // Ensure Deluxe section is positioned immediately after Extra if both are visible
+    const isDeluxeVisible = rawSections.some((s: any) => s.id === "deluxe" && s.visible !== false);
     const extraIdx = visibleSections.findIndex((s: any) => s.id === "extra");
-    const deluxeInList = visibleSections.find((s: any) => s.id === "deluxe");
-    if (extraIdx !== -1) {
+    if (isDeluxeVisible && extraIdx !== -1) {
+        const deluxeItem = visibleSections.find((s: any) => s.id === "deluxe") || { id: "deluxe", visible: true };
         visibleSections = visibleSections.filter((s: any) => s.id !== "deluxe");
-        visibleSections.splice(extraIdx + 1, 0, deluxeInList || { id: "deluxe", visible: true });
+        visibleSections.splice(extraIdx + 1, 0, deluxeItem);
     }
 
     return (
