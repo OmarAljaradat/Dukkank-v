@@ -47083,7 +47083,7 @@ var DEFAULT_SITE_SETTINGS = {
   disableTextSelection: false
 };
 var DEFAULT_LAUNCH_ANNOUNCEMENT = {
-  enabled: true,
+  enabled: false,
   theme: "eafc",
   gameName: "EA SPORTS FC 27",
   badge: "⚽ انطلاقة الموسم الكروي الجديد",

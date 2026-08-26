@@ -93,7 +93,7 @@ const FALLBACK_SITE_SETTINGS = {
 };
 
 const FALLBACK_LAUNCH_ANNOUNCEMENT = {
-    enabled: true,
+    enabled: false,
     theme: "eafc",
     gameName: "EA SPORTS FC 27",
     badge: "⚽ انطلاقة الموسم الكروي الجديد",

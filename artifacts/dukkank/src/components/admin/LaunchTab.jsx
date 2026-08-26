@@ -73,8 +73,22 @@ export default function LaunchTab({ onChanged }) {
         toast.success(`تم استيراد كافة بيانات وتفاصيل (${game.name}) بنجاح 🎮!`);
     };
 
-    // 🎮 GTA VI VICE CITY - Clean Explicit Theme Preset
+    // 🎮 GTA VI VICE CITY - Clean Explicit Theme Preset (Toggleable)
     const handleGTAVIPreset = async () => {
+        if (form.enabled && form.theme === "vice") {
+            const newData = { ...form, enabled: false };
+            setForm(newData);
+            try {
+                setLaunchAnnouncement(newData);
+                await apiUpdateLaunchAnnouncement(newData);
+                toast.success("🙈 تم إيقاف وإخفاء ثيم GTA VI من المتجر!");
+                onChanged?.();
+            } catch (err) {
+                toast.error(formatApiError(err));
+            }
+            return;
+        }
+
         const launchDate = new Date("2025-10-28");
         const launchIso = launchDate.toISOString().split("T")[0];
 
@@ -115,8 +129,22 @@ export default function LaunchTab({ onChanged }) {
         }
     };
 
-    // ⚽ EA SPORTS FC - Clean Explicit Theme Preset
+    // ⚽ EA SPORTS FC - Clean Explicit Theme Preset (Toggleable)
     const handleEAFCPreset = async () => {
+        if (form.enabled && form.theme === "eafc") {
+            const newData = { ...form, enabled: false };
+            setForm(newData);
+            try {
+                setLaunchAnnouncement(newData);
+                await apiUpdateLaunchAnnouncement(newData);
+                toast.success("🙈 تم إيقاف وإخفاء ثيم EA SPORTS FC من المتجر!");
+                onChanged?.();
+            } catch (err) {
+                toast.error(formatApiError(err));
+            }
+            return;
+        }
+
         const launchDate = new Date();
         launchDate.setDate(launchDate.getDate() + 14);
         const launchIso = launchDate.toISOString().split("T")[0];
@@ -452,11 +480,58 @@ https://dukkank.com`;
                 </div>
             </div>
 
+            {/* 🚦 Live Store Banner Global Status Bar */}
+            <div className={`p-4 rounded-3xl border transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+                form.enabled
+                    ? "bg-emerald-950/40 border-emerald-500/40 text-emerald-300"
+                    : "bg-slate-900/80 border-slate-800 text-slate-400"
+            }`}>
+                <div className="flex items-center gap-3">
+                    <span className={`w-3.5 h-3.5 rounded-full shrink-0 ${
+                        form.enabled ? "bg-emerald-400 shadow-[0_0_12px_#34d399] animate-pulse" : "bg-slate-600"
+                    }`} />
+                    <div className="text-xs font-bold">
+                        <span>حالة البنر بالصفحة الرئيسية للمتجر: </span>
+                        {form.enabled ? (
+                            <strong className="text-white font-black">مفعّل ويظهر للزوار حالياً ({form.gameName || "ثيم إطلاق"}) 🟢</strong>
+                        ) : (
+                            <strong className="text-slate-300 font-bold">معطّل ومخفي (الوضع الافتراضي للمتجر بدون ثيم إطلاق) ⚪</strong>
+                        )}
+                    </div>
+                </div>
+
+                {form.enabled ? (
+                    <button
+                        type="button"
+                        onClick={async () => {
+                            const newData = { ...form, enabled: false };
+                            setForm(newData);
+                            try {
+                                setLaunchAnnouncement(newData);
+                                await apiUpdateLaunchAnnouncement(newData);
+                                toast.success("🙈 تم إيقاف وإخفاء بنر الإطلاق من المتجر بالكامل!");
+                                onChanged?.();
+                            } catch (err) {
+                                toast.error(formatApiError(err));
+                            }
+                        }}
+                        className="px-4 py-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 text-xs font-black transition cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95"
+                    >
+                        <EyeOff className="w-4 h-4" />
+                        <span>إيقاف البنر وإخفاؤه من المتجر الآن 🚫</span>
+                    </button>
+                ) : (
+                    <span className="text-[11px] text-slate-400 font-medium">
+                        اختر أي ثيم أدناه لتفعيله فوراً بالمتجر
+                    </span>
+                )}
+            </div>
+
             {/* 🎮 Major Game Launch Presets Bar */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* 🌴 GTA VI Vice City Quick Preset */}
                 <div className={`relative rounded-3xl overflow-hidden shadow-xl bg-slate-900/90 p-5 flex flex-col justify-between space-y-4 transition-all duration-300 ${
-                    form.theme === "vice"
+                    form.enabled && form.theme === "vice"
                         ? "border-2 border-pink-500 ring-2 ring-pink-500/30 shadow-pink-500/20"
                         : "border border-pink-500/20 opacity-80 hover:opacity-100"
                 }`}>
@@ -483,7 +558,7 @@ https://dukkank.com`;
                                 </p>
                             </div>
                         </div>
-                        {form.theme === "vice" && (
+                        {form.enabled && form.theme === "vice" && (
                             <span className="px-2.5 py-1 rounded-full bg-pink-500/20 border border-pink-500/50 text-pink-300 text-[10px] font-black shrink-0">
                                 ✅ المفعّل حالياً
                             </span>
@@ -492,20 +567,33 @@ https://dukkank.com`;
                     <button
                         type="button"
                         onClick={handleGTAVIPreset}
-                        className="w-full py-2.5 rounded-xl font-black text-xs text-white transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-2"
-                        style={{
+                        className={`w-full py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-2 ${
+                            form.enabled && form.theme === "vice"
+                                ? "bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40"
+                                : "text-white"
+                        }`}
+                        style={form.enabled && form.theme === "vice" ? {} : {
                             background: "linear-gradient(135deg, #ff2d78, #ff8c42)",
                             boxShadow: "0 4px 15px rgba(255,45,120,0.3)",
                         }}
                     >
-                        <Flame className="w-4 h-4" />
-                        <span>{form.theme === "vice" ? "✅ ثيم GTA VI مفعّل حالياً بالمتجر" : "تفعيل ثيم GTA VI 🎮"}</span>
+                        {form.enabled && form.theme === "vice" ? (
+                            <>
+                                <EyeOff className="w-4 h-4 text-red-400" />
+                                <span>إيقاف وتعطيل ثيم GTA VI من المتجر ⏸️</span>
+                            </>
+                        ) : (
+                            <>
+                                <Flame className="w-4 h-4" />
+                                <span>تفعيل ثيم GTA VI 🎮</span>
+                            </>
+                        )}
                     </button>
                 </div>
 
                 {/* ⚽ EA SPORTS FC Quick Preset */}
                 <div className={`relative rounded-3xl overflow-hidden shadow-xl bg-slate-900/90 p-5 flex flex-col justify-between space-y-4 transition-all duration-300 ${
-                    form.theme === "eafc"
+                    form.enabled && form.theme === "eafc"
                         ? "border-2 border-emerald-400 ring-2 ring-emerald-400/30 shadow-emerald-400/20"
                         : "border border-emerald-500/20 opacity-80 hover:opacity-100"
                 }`}>
@@ -524,7 +612,7 @@ https://dukkank.com`;
                                 </p>
                             </div>
                         </div>
-                        {form.theme === "eafc" && (
+                        {form.enabled && form.theme === "eafc" && (
                             <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-[10px] font-black shrink-0">
                                 ✅ المفعّل حالياً
                             </span>
@@ -533,10 +621,23 @@ https://dukkank.com`;
                     <button
                         type="button"
                         onClick={handleEAFCPreset}
-                        className="w-full py-2.5 rounded-xl font-black text-xs text-slate-950 transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-400 to-teal-300 shadow-[0_4px_15px_rgba(52,211,153,0.3)]"
+                        className={`w-full py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-2 ${
+                            form.enabled && form.theme === "eafc"
+                                ? "bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40"
+                                : "bg-gradient-to-r from-emerald-400 to-teal-300 text-slate-950 shadow-[0_4px_15px_rgba(52,211,153,0.3)]"
+                        }`}
                     >
-                        <Zap className="w-4 h-4" />
-                        <span>{form.theme === "eafc" ? "✅ ثيم EA SPORTS FC مفعّل حالياً بالمتجر" : "تفعيل ثيم EA SPORTS FC ⚽"}</span>
+                        {form.enabled && form.theme === "eafc" ? (
+                            <>
+                                <EyeOff className="w-4 h-4 text-red-400" />
+                                <span>إيقاف وتعطيل ثيم EA SPORTS FC من المتجر ⏸️</span>
+                            </>
+                        ) : (
+                            <>
+                                <Zap className="w-4 h-4" />
+                                <span>تفعيل ثيم EA SPORTS FC ⚽</span>
+                            </>
+                        )}
                     </button>
                 </div>
             </div>
