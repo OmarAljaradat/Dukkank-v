@@ -1,6 +1,6 @@
 {
-  "installCommand": "pnpm install",
-  "buildCommand": "pnpm run vercel-build",
+  "installCommand": "npx pnpm install --no-frozen-lockfile",
+  "buildCommand": "npx pnpm run vercel-build",
   "outputDirectory": "artifacts/dukkank/dist/public",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index.js" },
