@@ -303,6 +303,14 @@ export function DataProvider({ children }) {
         };
     };
 
+    const mergeLaunchAnnouncement = (fetched) => {
+        if (!fetched || typeof fetched !== "object" || Array.isArray(fetched)) return launchAnnouncement;
+        return {
+            ...FALLBACK_LAUNCH_ANNOUNCEMENT,
+            ...fetched,
+        };
+    };
+
     const asArray = (v, fallback) => (Array.isArray(v) && v.length > 0 ? v : fallback);
     const asObject = (v, fallback) => v && typeof v === "object" && !Array.isArray(v) ? v : fallback;
 
@@ -351,7 +359,7 @@ export function DataProvider({ children }) {
             }
             if (cnt?.data) setContent(mergeContent(cnt.data));
             if (ss?.data) setSiteSettings(asObject(ss.data, siteSettings));
-            if (la?.data) setLaunchAnnouncement(asObject(la.data, launchAnnouncement));
+            if (la?.data) setLaunchAnnouncement(mergeLaunchAnnouncement(la.data));
 
             const token = getToken();
             if (token) {

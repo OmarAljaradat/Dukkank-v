@@ -27,13 +27,13 @@ router.put("/admin/sections", async (req, res) => {
 // ── LAUNCH ANNOUNCEMENT ───────────────────────────────────────────────────────
 router.get("/launch-announcement", async (_req, res) => {
   const data = await dbLoad("launchAnnouncement", DEFAULT_LAUNCH_ANNOUNCEMENT);
-  res.json(data);
+  res.json({ ...DEFAULT_LAUNCH_ANNOUNCEMENT, ...data });
 });
 
 router.put("/admin/launch-announcement", async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const current = await dbLoad("launchAnnouncement", DEFAULT_LAUNCH_ANNOUNCEMENT);
-  const updated = { ...current, ...req.body };
+  const updated = { ...DEFAULT_LAUNCH_ANNOUNCEMENT, ...current, ...req.body };
   await dbSave("launchAnnouncement", updated);
   res.json(updated);
 });

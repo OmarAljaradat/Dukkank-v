@@ -8,17 +8,41 @@ import {
 } from "lucide-react";
 
 export default function LaunchTab({ onChanged }) {
-    const { launchAnnouncement, setLaunchAnnouncement, games } = useStoreData();
+    const { launchAnnouncement, setLaunchAnnouncement, games, sections, setSections } = useStoreData();
     const [form, setForm] = useState(launchAnnouncement || {});
     const [saving, setSaving] = useState(false);
     const [aiPrompt, setAiPrompt] = useState("");
     const [aiGenerating, setAiGenerating] = useState(false);
 
     useEffect(() => {
-        setForm(launchAnnouncement || {});
+        if (launchAnnouncement) {
+            setForm((prev) => ({
+                ...prev,
+                ...launchAnnouncement,
+            }));
+        }
     }, [launchAnnouncement]);
 
     const set = (key, val) => setForm((prev) => ({ ...prev, [key]: val }));
+
+    const ensureSectionVisible = async () => {
+        if (sections && setSections) {
+            const isVisible = sections.some((s) => s.id === "gamelaunch" && s.visible);
+            if (!isVisible) {
+                const updatedSecs = sections.map((s) => (s.id === "gamelaunch" ? { ...s, visible: true } : s));
+                setSections(updatedSecs);
+                try {
+                    await apiUpdateSections(
+                        updatedSecs.map((s) => ({
+                            id: s.id,
+                            label: s.label || s.id,
+                            visible: !!s.visible,
+                        }))
+                    );
+                } catch (_) {}
+            }
+        }
+    };
 
     // 1-Click Game Auto-Filler Handler
     const handleSelectGame = (gameId) => {
@@ -55,6 +79,7 @@ export default function LaunchTab({ onChanged }) {
         const newData = {
             ...form,
             enabled: true,
+            theme: "vice",
             gameName: "Grand Theft Auto VI",
             badge: "🔥 الإصدار الأضخم في تاريخ الألعاب",
             subtitle: "عيش تجربة فايس سيتي بالكامل — عالم مفتوح بلا حدود مع Rockstar Games",
@@ -65,7 +90,6 @@ export default function LaunchTab({ onChanged }) {
             ctaHref: "#games",
             image: "",
             imageUrl: "",
-            theme: "vice",
             bonusGift: "🎁 ضمان ذهبي مدى الحياة + GTA Online مجاناً + شحن $500,000 داخل اللعبة",
             rating: "⭐ الأكثر انتظاراً في تاريخ الألعاب • 🏆 Rockstar Games",
             stockLeft: 12,
@@ -82,7 +106,8 @@ export default function LaunchTab({ onChanged }) {
         try {
             setLaunchAnnouncement(newData);
             await apiUpdateLaunchAnnouncement(newData);
-            toast.success("🌴 تم نشر ونقل المتجر إلى ثيم GTA VI — Vice City بنجاح! 🎮🔥");
+            await ensureSectionVisible();
+            toast.success("🌴 تم تفعيل ونشر ثيم GTA VI — Vice City بنجاح! 🎮🔥");
             onChanged?.();
         } catch (err) {
             toast.error(formatApiError(err));
@@ -98,6 +123,7 @@ export default function LaunchTab({ onChanged }) {
         const newData = {
             ...form,
             enabled: true,
+            theme: "eafc",
             gameName: "EA SPORTS FC 27",
             badge: "⚽ انطلاقة الموسم الكروي الجديد",
             subtitle: "عِش متعة كرة القدم الحقيقية في Ultimate Team وأنماط المهنة الرقمية",
@@ -108,7 +134,6 @@ export default function LaunchTab({ onChanged }) {
             ctaHref: "#games",
             image: "",
             imageUrl: "",
-            theme: "eafc",
             bonusGift: "🎁 شامل 4600 FC Points + ضمان ذهبي طوال الموسم الكروي",
             rating: "⭐ اللعبة الكروية الأولى عالمياً • 🏆 EA SPORTS",
             stockLeft: 15,
@@ -125,7 +150,8 @@ export default function LaunchTab({ onChanged }) {
         try {
             setLaunchAnnouncement(newData);
             await apiUpdateLaunchAnnouncement(newData);
-            toast.success("⚽ تم نشر ونقل المتجر إلى ثيم EA SPORTS FC بنجاح! 🏆");
+            await ensureSectionVisible();
+            toast.success("⚽ تم تفعيل ونشر ثيم EA SPORTS FC بنجاح! 🏆");
             onChanged?.();
         } catch (err) {
             toast.error(formatApiError(err));

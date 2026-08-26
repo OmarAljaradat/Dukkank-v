@@ -47079,7 +47079,27 @@ var DEFAULT_SITE_SETTINGS = {
 };
 var DEFAULT_LAUNCH_ANNOUNCEMENT = {
   enabled: true,
-  theme: "vice"
+  theme: "vice",
+  gameName: "Grand Theft Auto VI",
+  badge: "🔥 الإصدار الأضخم في تاريخ الألعاب",
+  subtitle: "عيش تجربة فايس سيتي بالكامل — عالم مفتوح بلا حدود مع Rockstar Games",
+  description: "احصل على حسابك الأصلي المضمون لأضخم لعبة في تاريخ صناعة الألعاب. Grand Theft Auto VI يأخذك في رحلة ملحمية داخل مدينة فايس سيتي المعاد بناؤها بالكامل مع رسومات الجيل القادم وعالم حي يتنفس. تسليم فوري مع ضمان ذهبي شامل.",
+  price5: 45.0,
+  price4: 28.0,
+  ctaLabel: "احجز نسختك الآن 🔥",
+  ctaHref: "#games",
+  image: "",
+  imageUrl: "",
+  bonusGift: "🎁 ضمان ذهبي مدى الحياة + GTA Online مجاناً + شحن $500,000 داخل اللعبة",
+  rating: "⭐ الأكثر انتظاراً في تاريخ الألعاب • 🏆 Rockstar Games",
+  stockLeft: 12,
+  trailerUrl: "https://www.youtube.com/embed/QdBZY2fkU-0",
+  countdownTarget: "2026-10-28",
+  launchDate: "2026-10-28",
+  note: "⚠️ الطلب المسبق يضمن لك أولوية التسليم فور الإطلاق الرسمي",
+  currency: "$",
+  platform5: "PS5",
+  platform4: "PS4"
 };
 var DEFAULT_COUPONS = [
   { id: "dukkank10", code: "DUKKANK10", discount_type: "percentage", discount_value: 10, max_uses: 100, current_uses: 12, is_active: true }
@@ -48072,12 +48092,12 @@ router13.put("/admin/sections", async (req, res) => {
 });
 router13.get("/launch-announcement", async (_req, res) => {
   const data = await dbLoad("launchAnnouncement", DEFAULT_LAUNCH_ANNOUNCEMENT);
-  res.json(data);
+  res.json({ ...DEFAULT_LAUNCH_ANNOUNCEMENT, ...data });
 });
 router13.put("/admin/launch-announcement", async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const current = await dbLoad("launchAnnouncement", DEFAULT_LAUNCH_ANNOUNCEMENT);
-  const updated = { ...current, ...req.body };
+  const updated = { ...DEFAULT_LAUNCH_ANNOUNCEMENT, ...current, ...req.body };
   await dbSave("launchAnnouncement", updated);
   res.json(updated);
 });
