@@ -97,8 +97,8 @@ export default function MarketingTab({ onChanged }) {
   const [activeTab, setActiveTab] = useState("email"); // 'email' | 'whatsapp' | 'promo' | 'settings'
 
   const toggleCampaign = async (key, name) => {
-    const currentVal = promo?.[key]?.enabled;
-    const nextVal = currentVal === false ? true : (currentVal === true ? false : false);
+    const currentVal = promo?.[key]?.enabled !== false;
+    const nextVal = !currentVal;
     const newPromo = {
       ...promo,
       [key]: { ...(promo?.[key] || {}), enabled: nextVal }

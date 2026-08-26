@@ -52,10 +52,13 @@ const TABS = [
     // ── المتجر والمنتجات
     { value: "games",        label: "🎮 الألعاب والمخزون",   group: "store" },
     { value: "subscriptions",label: "📦 الاشتراكات",       group: "store" },
+    { value: "bundles",      label: "🎁 الباقات المدمجة",   group: "store" },
+    { value: "store",        label: "⚙️ إعدادات المتجر",   group: "store" },
     { value: "suppliers",    label: "🚚 إدارة الموردين",       group: "store" },
     { value: "gifts",        label: "🎁 طلبات الهدايا الرقمية",group: "store" },
     { value: "coupons",      label: "🎟️ الكوبونات والعروض", group: "store" },
     { value: "launch",       label: "📢 إعلان الألعاب الضخمة",group: "store" },
+    { value: "productsCSV",  label: "📄 تصدير واستيراد CSV",group: "store" },
     // ── المحتوى والتصميم
     { value: "sections",     label: "📑 ترتيب الأقسام",    group: "design" },
     { value: "content",      label: "✏️ محتوى نصوص الموقع",group: "design" },

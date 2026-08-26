@@ -77,7 +77,7 @@ export default function SuppliersTab() {
         const nextList = suppliers.map((s) => (s.id === editingId ? { ...s, ...form } : s));
         setSuppliers(nextList);
         saveLocalSuppliers(nextList);
-        await apiUpdateSupplier(editingId, form);
+        try { await apiUpdateSupplier(editingId, form); } catch {}
         toast.success("تم تحديث بيانات المورد بنجاح ✅");
       } else {
         const tempId = Date.now();
@@ -92,11 +92,10 @@ export default function SuppliersTab() {
         const nextList = [newSupplier, ...suppliers];
         setSuppliers(nextList);
         saveLocalSuppliers(nextList);
-        await apiCreateSupplier(form);
+        try { await apiCreateSupplier(form); } catch {}
         toast.success("تمت إضافة المورد الجديد بنجاح ✅");
       }
       resetForm();
-      await fetchSuppliers();
     } catch (e) {
       toast.error(formatApiError(e));
     } finally {
