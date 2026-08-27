@@ -139,7 +139,7 @@ export default function ThemeTab({ onChanged }) {
                 }
             })
             .catch(() => {});
-    }, [storeTheme]);
+    }, []);
 
     const save = async () => {
         setSaving(true);

@@ -44,8 +44,9 @@ export default function SectionsTab({ onChanged }) {
             await apiUpdateSections(
                 newItems.map((s) => ({
                     id: s.id,
-                    label: s.label || s.id,
-                    visible: !!s.visible,
+                    label: s.label || s.name || s.id,
+                    name: s.name || s.label || s.id,
+                    visible: s.visible !== false,
                 }))
             );
             onChanged?.();
@@ -147,8 +148,9 @@ export default function SectionsTab({ onChanged }) {
             await apiUpdateSections(
                 items.map((s) => ({
                     id: s.id,
-                    label: s.label || s.id,
-                    visible: !!s.visible,
+                    label: s.label || s.name || s.id,
+                    name: s.name || s.label || s.id,
+                    visible: s.visible !== false,
                 })),
             );
             toast.success("تم حفظ ترتيب الأقسام بنجاح 💾");
