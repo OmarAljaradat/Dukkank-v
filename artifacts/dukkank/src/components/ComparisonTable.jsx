@@ -11,14 +11,14 @@ const DEFAULT_ROWS = [
 ];
 
 export const ComparisonTable = () => {
-    const { content, subscriptions } = useStoreData();
+    const { content, subscriptions, sections } = useStoreData();
     const c = content?.comparison || {};
     const ROWS = c.rows && c.rows.length >= 4 ? c.rows : DEFAULT_ROWS;
 
-    // Check visibility of each subscription tier
-    const isEssVisible = (subscriptions || []).find((s) => s.id === "essential")?.visible !== false;
-    const isExtVisible = (subscriptions || []).find((s) => s.id === "extra")?.visible !== false;
-    const isDelVisible = (subscriptions || []).find((s) => s.id === "deluxe")?.visible !== false;
+    // Check visibility of each subscription tier in both subscriptions and sections
+    const isEssVisible = (subscriptions || []).find((s) => s.id === "essential")?.visible !== false && (sections || []).find((s) => s.id === "essential")?.visible !== false;
+    const isExtVisible = (subscriptions || []).find((s) => s.id === "extra")?.visible !== false && (sections || []).find((s) => s.id === "extra")?.visible !== false;
+    const isDelVisible = (subscriptions || []).find((s) => s.id === "deluxe" || s.id.includes("deluxe"))?.visible !== false && (sections || []).find((s) => s.id === "deluxe")?.visible !== false;
 
     const activeColsCount = (isEssVisible ? 1 : 0) + (isExtVisible ? 1 : 0) + (isDelVisible ? 1 : 0);
 

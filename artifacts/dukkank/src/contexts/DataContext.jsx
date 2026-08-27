@@ -408,6 +408,43 @@ export function DataProvider({ children }) {
 
     useEffect(() => {
         fetchAll();
+
+        // 1. Live cross-tab sync: update state immediately when admin modifies data in another tab
+        const handleStorageChange = (e) => {
+            if (!e.key || !e.newValue) return;
+            try {
+                const parsed = JSON.parse(e.newValue);
+                if (e.key === "dukkank_live_subscriptions") setSubscriptionsState(parsed);
+                else if (e.key === "dukkank_live_sections") setSectionsState(parsed);
+                else if (e.key === "dukkank_live_games") setGamesState(parsed);
+                else if (e.key === "dukkank_live_theme") {
+                    setThemeState(parsed);
+                    if (parsed && typeof parsed === "object") applyTheme(parsed);
+                }
+                else if (e.key === "dukkank_live_launch") setLaunchAnnouncementState(parsed);
+                else if (e.key === "dukkank_live_promo") setPromoState(parsed);
+                else if (e.key === "dukkank_live_store") setStoreState(parsed);
+                else if (e.key === "dukkank_live_content") setContentState(parsed);
+                else if (e.key === "dukkank_live_site_settings") setSiteSettingsState(parsed);
+            } catch (_) {}
+        };
+
+        // 2. Tab focus / visibility sync: refetch fresh data from server when user switches back to tab
+        const handleVisibilityOrFocus = () => {
+            if (document.visibilityState === "visible") {
+                fetchAll();
+            }
+        };
+
+        window.addEventListener("storage", handleStorageChange);
+        window.addEventListener("focus", handleVisibilityOrFocus);
+        document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+
+        return () => {
+            window.removeEventListener("storage", handleStorageChange);
+            window.removeEventListener("focus", handleVisibilityOrFocus);
+            document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
+        };
     }, [fetchAll]);
 
     return (

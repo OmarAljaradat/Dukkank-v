@@ -247,10 +247,21 @@ function HomePage() {
     const REMOVED_IDS = ["bundles", "bundleBuilder", "recommender", "emailSignup", "promoBanner"];
     const heroSec = rawSections.find((s: any) => s.id === "hero");
     const isHeroVisible = heroSec ? heroSec.visible !== false : true;
-    let visibleSections = rawSections.filter((s: any) => s.visible !== false && s.id !== "hero" && !REMOVED_IDS.includes(s.id));
+
+    // Check visibility across both sections and subscriptions
+    let visibleSections = rawSections.filter((s: any) => {
+        if (s.visible === false) return false;
+        if (s.id === "hero" || REMOVED_IDS.includes(s.id)) return false;
+        if (s.id === "essential" && (subscriptions || []).find((sub: any) => sub.id === "essential")?.visible === false) return false;
+        if (s.id === "extra" && (subscriptions || []).find((sub: any) => sub.id === "extra")?.visible === false) return false;
+        if (s.id === "deluxe" && (subscriptions || []).find((sub: any) => sub.id === "deluxe" || sub.id.includes("deluxe"))?.visible === false) return false;
+        return true;
+    });
 
     // Ensure Deluxe section is positioned immediately after Extra if both are visible
-    const isDeluxeVisible = rawSections.some((s: any) => s.id === "deluxe" && s.visible !== false);
+    const isDeluxeSubVisible = (subscriptions || []).find((sub: any) => sub.id === "deluxe" || sub.id.includes("deluxe"))?.visible !== false;
+    const isDeluxeSecVisible = rawSections.some((s: any) => s.id === "deluxe" && s.visible !== false);
+    const isDeluxeVisible = isDeluxeSubVisible && isDeluxeSecVisible;
     const extraIdx = visibleSections.findIndex((s: any) => s.id === "extra");
     if (isDeluxeVisible && extraIdx !== -1) {
         const deluxeItem = visibleSections.find((s: any) => s.id === "deluxe") || { id: "deluxe", visible: true };
