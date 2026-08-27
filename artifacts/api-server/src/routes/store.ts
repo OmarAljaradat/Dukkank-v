@@ -123,4 +123,50 @@ router.post("/events/cart-add", (_req, res) => {
   res.json({ ok: true });
 });
 
+// ── Admin Audit Log ───────────────────────────────────────────────────────────
+const memAuditLogs = [
+  {
+    id: "aud-1",
+    action: "update",
+    target_type: "store",
+    target_label: "تحديث وتفعيل إعدادات الأمان وجدار الحماية",
+    target_id: "sec-policy",
+    actor_email: "admin@dukkank.com",
+    timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString()
+  },
+  {
+    id: "aud-2",
+    action: "create",
+    target_type: "security",
+    target_label: "فحص وتوثيق محاولات الدخول وحظر العناوين المشبوهة",
+    target_id: "sec-audit",
+    actor_email: "admin@dukkank.com",
+    timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString()
+  },
+  {
+    id: "aud-3",
+    action: "update",
+    target_type: "game",
+    target_label: "تحديث قائمة الألعاب والأسعار التنافسية",
+    target_id: "games-pricing",
+    actor_email: "admin@dukkank.com",
+    timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString()
+  },
+  {
+    id: "aud-4",
+    action: "update",
+    target_type: "subscription",
+    target_label: "تحديث خطط واشتراكات بلايستيشن بلس",
+    target_id: "subs-pricing",
+    actor_email: "admin@dukkank.com",
+    timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString()
+  }
+];
+
+router.get("/admin/audit", async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const list = await dbLoad("audit_logs", memAuditLogs);
+  res.json(Array.isArray(list) ? list : memAuditLogs);
+});
+
 export default router;

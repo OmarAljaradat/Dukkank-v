@@ -364,8 +364,8 @@ router.put("/admin/store-orders/:id/complete", async (req, res) => {
 
 router.get("/admin/suppliers", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  const list = await dbLoad("suppliers", memSuppliers);
-  res.json(Array.isArray(list) ? list : memSuppliers);
+  const list = await dbLoad("suppliers", suppliers);
+  res.json(Array.isArray(list) ? list : suppliers);
 });
 
 router.post("/admin/suppliers", async (req, res) => {
@@ -373,8 +373,8 @@ router.post("/admin/suppliers", async (req, res) => {
   const { name, phone, notes } = req.body || {};
   if (!name || !phone) { res.status(400).json({ error: "اسم المورد ورقم الهاتف مطلوبان" }); return; }
 
-  const list = await dbLoad("suppliers", memSuppliers);
-  const arr = Array.isArray(list) ? [...list] : [...memSuppliers];
+  const list = await dbLoad("suppliers", suppliers);
+  const arr = Array.isArray(list) ? [...list] : [...suppliers];
 
   const newSupplier: Supplier = {
     id: Date.now(),
@@ -394,8 +394,8 @@ router.put("/admin/suppliers/:id", async (req, res) => {
   const id = req.params.id;
   const { name, phone, notes, is_active } = req.body || {};
 
-  const list = await dbLoad("suppliers", memSuppliers);
-  const arr = Array.isArray(list) ? [...list] : [...memSuppliers];
+  const list = await dbLoad("suppliers", suppliers);
+  const arr = Array.isArray(list) ? [...list] : [...suppliers];
 
   const idx = arr.findIndex(s => String(s.id) === String(id));
   if (idx === -1) { res.status(404).json({ error: "المورد غير موجود" }); return; }
@@ -415,8 +415,8 @@ router.delete("/admin/suppliers/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const id = req.params.id;
 
-  const list = await dbLoad("suppliers", memSuppliers);
-  const arr = Array.isArray(list) ? [...list] : [...memSuppliers];
+  const list = await dbLoad("suppliers", suppliers);
+  const arr = Array.isArray(list) ? [...list] : [...suppliers];
   const next = arr.filter(s => String(s.id) !== String(id));
   await dbSave("suppliers", next);
   res.json({ ok: true });

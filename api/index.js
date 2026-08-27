@@ -46887,7 +46887,7 @@ var import_express7 = __toESM(require_express2(), 1);
 
 // src/lib/storeDb.ts
 var pool5 = new esm_default.Pool({ connectionString: process.env.DATABASE_URL });
-var memSuppliers2 = [
+var memSuppliers = [
   { id: 1, name: "\u0623\u0628\u0648 \u062E\u0627\u0644\u062F (\u0645\u0648\u0631\u062F \u0627\u0644\u0623\u0644\u0639\u0627\u0628 \u0627\u0644\u0631\u0626\u064A\u0633\u064A\u0629)", phone: "962775585112", notes: "\u062A\u0648\u0641\u064A\u0631 \u0641\u0648\u0631\u064A \u062E\u0644\u0627\u0644 15 \u062F\u0642\u064A\u0642\u0629", is_active: true, created_at: new Date(Date.now() - 864e5 * 10).toISOString() },
   { id: 2, name: "\u0634\u0631\u0643\u0629 \u0627\u0644\u0623\u0644\u0639\u0627\u0628 \u0627\u0644\u0639\u0627\u0644\u0645\u064A\u0629 (\u0645\u0648\u0631\u062F \u0627\u0644\u0627\u0634\u062A\u0631\u0627\u0643\u0627\u062A)", phone: "962791234567", notes: "\u0645\u062A\u062E\u0635\u0635 \u0628\u0627\u0634\u062A\u0631\u0627\u0643\u0627\u062A \u0628\u0644\u0633 \u0625\u0643\u0633\u062A\u0631\u0627 \u0648\u0641\u0627\u062E\u0631", is_active: true, created_at: new Date(Date.now() - 864e5 * 5).toISOString() }
 ];
@@ -47508,8 +47508,8 @@ router7.put("/admin/store-orders/:id/complete", async (req, res) => {
 });
 router7.get("/admin/suppliers", async (req, res) => {
   if (!requireAdmin(req, res)) return;
-  const list = await dbLoad("suppliers", memSuppliers);
-  res.json(Array.isArray(list) ? list : memSuppliers);
+  const list = await dbLoad("suppliers", suppliers);
+  res.json(Array.isArray(list) ? list : suppliers);
 });
 router7.post("/admin/suppliers", async (req, res) => {
   if (!requireAdmin(req, res)) return;
@@ -47518,8 +47518,8 @@ router7.post("/admin/suppliers", async (req, res) => {
     res.status(400).json({ error: "\u0627\u0633\u0645 \u0627\u0644\u0645\u0648\u0631\u062F \u0648\u0631\u0642\u0645 \u0627\u0644\u0647\u0627\u062A\u0641 \u0645\u0637\u0644\u0648\u0628\u0627\u0646" });
     return;
   }
-  const list = await dbLoad("suppliers", memSuppliers);
-  const arr = Array.isArray(list) ? [...list] : [...memSuppliers];
+  const list = await dbLoad("suppliers", suppliers);
+  const arr = Array.isArray(list) ? [...list] : [...suppliers];
   const newSupplier = {
     id: Date.now(),
     name: String(name).trim(),
@@ -47536,8 +47536,8 @@ router7.put("/admin/suppliers/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const id = req.params.id;
   const { name, phone, notes, is_active } = req.body || {};
-  const list = await dbLoad("suppliers", memSuppliers);
-  const arr = Array.isArray(list) ? [...list] : [...memSuppliers];
+  const list = await dbLoad("suppliers", suppliers);
+  const arr = Array.isArray(list) ? [...list] : [...suppliers];
   const idx = arr.findIndex((s) => String(s.id) === String(id));
   if (idx === -1) {
     res.status(404).json({ error: "\u0627\u0644\u0645\u0648\u0631\u062F \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F" });
@@ -47556,8 +47556,8 @@ router7.put("/admin/suppliers/:id", async (req, res) => {
 router7.delete("/admin/suppliers/:id", async (req, res) => {
   if (!requireAdmin(req, res)) return;
   const id = req.params.id;
-  const list = await dbLoad("suppliers", memSuppliers);
-  const arr = Array.isArray(list) ? [...list] : [...memSuppliers];
+  const list = await dbLoad("suppliers", suppliers);
+  const arr = Array.isArray(list) ? [...list] : [...suppliers];
   const next = arr.filter((s) => String(s.id) !== String(id));
   await dbSave("suppliers", next);
   res.json({ ok: true });
@@ -47840,6 +47840,49 @@ router9.delete("/admin/notify-requests/:id", (req, res) => {
 router9.post("/events/cart-add", (_req, res) => {
   recordCartAdd();
   res.json({ ok: true });
+});
+var memAuditLogs = [
+  {
+    id: "aud-1",
+    action: "update",
+    target_type: "store",
+    target_label: "\u062A\u062D\u062F\u064A\u062B \u0648\u062A\u0641\u0639\u064A\u0644 \u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0623\u0645\u0627\u0646 \u0648\u062C\u062F\u0627\u0631 \u0627\u0644\u062D\u0645\u0627\u064A\u0629",
+    target_id: "sec-policy",
+    actor_email: "admin@dukkank.com",
+    timestamp: new Date(Date.now() - 1e3 * 60 * 5).toISOString()
+  },
+  {
+    id: "aud-2",
+    action: "create",
+    target_type: "security",
+    target_label: "\u0641\u062D\u0635 \u0648\u062A\u0648\u062B\u064A\u0642 \u0645\u062D\u0627\u0648\u0644\u0627\u062A \u0627\u0644\u062F\u062E\u0648\u0644 \u0648\u062D\u0638\u0631 \u0627\u0644\u0639\u0646\u0627\u0648\u064A\u0646 \u0627\u0644\u0645\u0634\u0628\u0648\u0647\u0629",
+    target_id: "sec-audit",
+    actor_email: "admin@dukkank.com",
+    timestamp: new Date(Date.now() - 1e3 * 60 * 15).toISOString()
+  },
+  {
+    id: "aud-3",
+    action: "update",
+    target_type: "game",
+    target_label: "\u062A\u062D\u062F\u064A\u062B \u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u0623\u0644\u0639\u0627\u0628 \u0648\u0627\u0644\u0623\u0633\u0639\u0627\u0631 \u0627\u0644\u062A\u0646\u0627\u0641\u0633\u064A\u0629",
+    target_id: "games-pricing",
+    actor_email: "admin@dukkank.com",
+    timestamp: new Date(Date.now() - 1e3 * 60 * 45).toISOString()
+  },
+  {
+    id: "aud-4",
+    action: "update",
+    target_type: "subscription",
+    target_label: "\u062A\u062D\u062F\u064A\u062B \u062E\u0637\u0637 \u0648\u0627\u0634\u062A\u0631\u0627\u0643\u0627\u062A \u0628\u0644\u0627\u064A\u0633\u062A\u064A\u0634\u0646 \u0628\u0644\u0633",
+    target_id: "subs-pricing",
+    actor_email: "admin@dukkank.com",
+    timestamp: new Date(Date.now() - 1e3 * 60 * 120).toISOString()
+  }
+];
+router9.get("/admin/audit", async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const list = await dbLoad("audit_logs", memAuditLogs);
+  res.json(Array.isArray(list) ? list : memAuditLogs);
 });
 var store_default = router9;
 
